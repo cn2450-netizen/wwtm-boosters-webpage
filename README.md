@@ -199,6 +199,8 @@ Data in `state.json` is **never** touched.
 
 ## Service Management
 
+### Using systemd (Recommended)
+
 ```bash
 # Start
 sudo systemctl start wwtmc
@@ -223,6 +225,28 @@ sudo systemctl disable wwtmc
 
 # Enable auto-start on reboot
 sudo systemctl enable wwtmc
+```
+
+### Using Start/Stop Scripts (Development)
+
+```bash
+# Start in background
+bash /var/www/wwtmc/start.sh
+
+# View logs
+tail -f /var/www/wwtmc/logs/wwtmc-latest.log
+
+# Stop
+bash /var/www/wwtmc/stop.sh
+```
+
+### Manual (Foreground, for debugging)
+
+```bash
+cd /var/www/wwtmc
+node server.js
+
+# Press Ctrl+C to stop
 ```
 
 ---

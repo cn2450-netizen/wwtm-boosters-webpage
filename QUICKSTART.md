@@ -68,6 +68,31 @@ node server.js
 
 ---
 
+## Running the Server
+
+### Option 1: Using systemd (Recommended for servers)
+```bash
+sudo systemctl start wwtmc
+sudo systemctl status wwtmc
+sudo journalctl -u wwtmc -f  # View logs
+```
+
+### Option 2: Background mode (Good for development)
+```bash
+bash /var/www/wwtmc/start.sh
+tail -f /var/www/wwtmc/logs/wwtmc-latest.log  # View logs
+bash /var/www/wwtmc/stop.sh  # Stop server
+```
+
+### Option 3: Foreground (for debugging)
+```bash
+cd /var/www/wwtmc
+node server.js
+# Ctrl+C to stop
+```
+
+---
+
 ## First Use
 
 1. **Access the site:** 
