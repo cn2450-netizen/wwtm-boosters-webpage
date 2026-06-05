@@ -1,0 +1,17 @@
+{
+  "name": "wwtmc-website",
+  "version": "1.0.0",
+  "description": "WWT Music Club website with admin panel",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "bcryptjs": "^2.4.3",
+    "express-session": "^1.17.3",
+    "helmet": "^7.1.0"
+  }
+}

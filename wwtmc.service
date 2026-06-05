@@ -1,0 +1,23 @@
+[Unit]
+Description=WWT Music Club Website
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/wwtmc
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=wwtmc
+
+# Environment
+Environment=NODE_ENV=production
+Environment=PORT=3000
+# IMPORTANT: Change this to a long random string in production!
+Environment=SESSION_SECRET=change-this-to-a-long-random-secret
+
+[Install]
+WantedBy=multi-user.target

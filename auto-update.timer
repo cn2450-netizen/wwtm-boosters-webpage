@@ -1,0 +1,19 @@
+[Unit]
+Description=WWT Music Club Auto-Update Timer
+Requires=auto-update.service
+
+[Timer]
+# Check for updates every 2 hours
+OnBootSec=5min
+OnUnitActiveSec=2h
+
+# Or use these for specific times:
+# OnCalendar=*-*-* 00,06,12,18:00:00  (every 6 hours at midnight, 6am, noon, 6pm)
+# OnCalendar=daily
+# OnCalendar=hourly
+
+# Run even if the previous timer was missed
+Persistent=true
+
+[Install]
+WantedBy=timers.target
