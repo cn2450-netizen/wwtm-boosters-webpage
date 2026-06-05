@@ -2,13 +2,18 @@
 
 ## ⚡ Quick Start
 
-**Fastest way to deploy:**
+**Fastest way to deploy — directly from GitHub:**
 
 ```bash
-sudo bash install.sh /path/to/wwtmc
+sudo bash install.sh https://github.com/cn2450-netizen/wwtm-boosters-webpage.git
 ```
 
 That's it! Everything is set up. See [**QUICKSTART.md**](QUICKSTART.md) for full details.
+
+**Or from a local directory:**
+```bash
+sudo bash install.sh /path/to/wwtmc
+```
 
 ---
 

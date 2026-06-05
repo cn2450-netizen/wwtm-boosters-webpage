@@ -1,6 +1,10 @@
 #!/bin/bash
 # WWT Music Club — Linux Installation Script
-# Run: sudo bash install.sh /path/to/wwtmc
+# Run: sudo bash install.sh <source>
+#
+# <source> can be:
+#   - /path/to/local/wwtmc (local directory)
+#   - https://github.com/user/repo.git (GitHub repo URL)
 
 set -e
 
@@ -16,19 +20,42 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
-   echo -e "${RED}✗ This script must be run as root (use: sudo bash install.sh)${NC}"
+   echo -e "${RED}✗ This script must be run as root (use: sudo bash install.sh <source>)${NC}"
    exit 1
 fi
 
-# Check for source directory argument
+# Check for source argument
 if [ -z "$1" ]; then
-  echo -e "${RED}✗ Usage: sudo bash install.sh /path/to/wwtmc${NC}"
-  echo "   Example: sudo bash install.sh /tmp/wwtmc"
+  echo -e "${RED}✗ Usage: sudo bash install.sh <source>${NC}"
+  echo ""
+  echo "Examples:"
+  echo "  # From local directory:"
+  echo "  sudo bash install.sh /tmp/wwtmc"
+  echo ""
+  echo "  # From GitHub repository:"
+  echo "  sudo bash install.sh https://github.com/cn2450-netizen/wwtm-boosters-webpage.git"
   exit 1
 fi
 
-SOURCE_DIR="$1"
+SOURCE_INPUT="$1"
 INSTALL_DIR="/var/www/wwtmc"
+
+# Detect if source is a git URL or local directory
+if [[ "$SOURCE_INPUT" == http* ]] || [[ "$SOURCE_INPUT" == git@* ]]; then
+  # It's a git URL — clone it
+  echo -e "${YELLOW}→${NC} Detected Git repository"
+  echo -e "${YELLOW}→${NC} Cloning from: $SOURCE_INPUT"
+  SOURCE_DIR="/tmp/wwtmc-install-$$"
+  mkdir -p "$SOURCE_DIR"
+  git clone --quiet --depth 1 "$SOURCE_INPUT" "$SOURCE_DIR" 2>&1 || {
+    echo -e "${RED}✗ Failed to clone repository${NC}"
+    rm -rf "$SOURCE_DIR"
+    exit 1
+  }
+else
+  # It's a local path
+  SOURCE_DIR="$SOURCE_INPUT"
+fi
 
 if [ ! -f "$SOURCE_DIR/server.js" ]; then
   echo -e "${RED}✗ $SOURCE_DIR/server.js not found${NC}"
@@ -120,6 +147,11 @@ if [ -f "$SOURCE_DIR/nginx.conf" ]; then
   fi
 else
   echo -e "${YELLOW}⚠${NC} nginx.conf not found (Nginx setup skipped)"
+fi
+
+# Cleanup temp directory if we cloned from git
+if [[ "$SOURCE_INPUT" == http* ]] || [[ "$SOURCE_INPUT" == git@* ]]; then
+  rm -rf "$SOURCE_DIR"
 fi
 
 echo ""

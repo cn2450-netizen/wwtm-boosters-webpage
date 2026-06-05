@@ -6,20 +6,31 @@
 - Ubuntu 20.04+ or Debian 11+ (or WSL with Ubuntu)
 - Root or sudo access
 - ~500MB free disk space
+- Git installed (for GitHub repos)
 
 ### One-Command Install
+
+#### Option 1: From GitHub (Recommended)
+```bash
+sudo bash install.sh https://github.com/cn2450-netizen/wwtm-boosters-webpage.git
+```
+
+The script will automatically:
+1. Clone your GitHub repo
+2. Set everything up
+3. Clean up temp files
+
+#### Option 2: From Local Directory
 ```bash
 sudo bash install.sh /path/to/wwtmc
 ```
-
-Replace `/path/to/wwtmc` with where your files are located.
 
 **Example:**
 ```bash
 sudo bash install.sh /tmp/wwtmc
 ```
 
-The script will:
+Either way, the script will:
 1. ✓ Install Node.js 20.x
 2. ✓ Create `/var/www/wwtmc/` directory
 3. ✓ Copy all files
