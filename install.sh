@@ -91,7 +91,11 @@ echo -e "${GREEN}✓${NC} Directories created"
 echo -e "${GREEN}[4/8]${NC} Copying application files..."
 cp "$SOURCE_DIR/server.js" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/package.json" "$INSTALL_DIR/"
-cp -r "$SOURCE_DIR/public/" "$INSTALL_DIR/public/"
+cp -r "$SOURCE_DIR/public/." "$INSTALL_DIR/public/"
+if [ ! -f "$INSTALL_DIR/public/index.html" ]; then
+  echo -e "${RED}✗ index.html was not copied — aborting${NC}"
+  exit 1
+fi
 echo -e "${GREEN}✓${NC} Files copied"
 
 # Step 5: Install npm dependencies
