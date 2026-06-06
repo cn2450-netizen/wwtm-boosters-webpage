@@ -5,6 +5,7 @@ const session    = require('express-session');
 const bcrypt     = require('bcryptjs');
 const helmet     = require('helmet');
 const multer     = require('multer');
+const nodemailer = require('nodemailer');
 const path       = require('path');
 const fs         = require('fs');
 
@@ -12,10 +13,11 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ─── Paths ───────────────────────────────────────────────
-const DATA_DIR    = path.join(__dirname, 'data');
-const UPLOADS_DIR = path.join(__dirname, 'public', 'uploads');
-const STATE_FILE  = path.join(DATA_DIR, 'state.json');
-const AUTH_FILE   = path.join(DATA_DIR, 'auth.json');
+const DATA_DIR         = path.join(__dirname, 'data');
+const UPLOADS_DIR      = path.join(__dirname, 'public', 'uploads');
+const STATE_FILE       = path.join(DATA_DIR, 'state.json');
+const AUTH_FILE        = path.join(DATA_DIR, 'auth.json');
+const EMAIL_CONFIG_FILE = path.join(DATA_DIR, 'email-config.json');
 
 [DATA_DIR, UPLOADS_DIR].forEach(d => fs.mkdirSync(d, { recursive: true }));
 
@@ -87,6 +89,29 @@ function getAuth() {
   return a;
 }
 function saveAuth(a) { writeJSON(AUTH_FILE, a); }
+
+function getEmailConfig()  { return readJSON(EMAIL_CONFIG_FILE, {}); }
+function saveEmailConfig(c) { writeJSON(EMAIL_CONFIG_FILE, c); }
+
+function makeTransporter(c) {
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com', port: 587, secure: false,
+    auth: { user: c.senderEmail, pass: c.appPassword },
+  });
+}
+
+// Simple per-IP rate limit for contact form (3 per minute)
+const contactAttempts = {};
+function contactRateLimit(req, res, next) {
+  const ip  = req.ip;
+  const now = Date.now();
+  const rec = contactAttempts[ip] || { count: 0, resetAt: now + 60000 };
+  if (now > rec.resetAt) { rec.count = 0; rec.resetAt = now + 60000; }
+  rec.count++;
+  contactAttempts[ip] = rec;
+  if (rec.count > 3) return res.status(429).json({ error: 'Too many messages. Please wait a minute.' });
+  next();
+}
 
 // ─── Multer (image uploads) ──────────────────────────────
 const storage = multer.diskStorage({
@@ -383,6 +408,62 @@ app.post('/api/about/upload', requireAuth, upload.single('image'), (req, res) =>
   s.aboutImgSrc = '/uploads/' + req.file.filename;
   saveState(s);
   res.json({ ok: true, src: s.aboutImgSrc });
+});
+
+// ── Email config ──────────────────────────────────────────
+app.get('/api/email-config', requireAuth, (req, res) => {
+  const c = getEmailConfig();
+  res.json({
+    senderEmail:    c.senderEmail    || '',
+    appPassword:    c.appPassword    ? '••••••••' : '',
+    recipientEmail: c.recipientEmail || '',
+    configured:     !!(c.senderEmail && c.appPassword && c.recipientEmail),
+  });
+});
+
+app.post('/api/email-config', requireAuth, (req, res) => {
+  const { senderEmail, appPassword, recipientEmail } = req.body;
+  const current = getEmailConfig();
+  saveEmailConfig({
+    senderEmail:    senderEmail    || current.senderEmail    || '',
+    appPassword:    (appPassword && appPassword !== '••••••••') ? appPassword : (current.appPassword || ''),
+    recipientEmail: recipientEmail || current.recipientEmail || '',
+  });
+  res.json({ ok: true });
+});
+
+app.post('/api/email-config/test', requireAuth, async (req, res) => {
+  const c = getEmailConfig();
+  if (!c.senderEmail || !c.appPassword) return res.status(400).json({ error: 'Email not configured yet' });
+  try {
+    await makeTransporter(c).sendMail({
+      from:    `"WWT Music Club" <${c.senderEmail}>`,
+      to:      c.recipientEmail || c.senderEmail,
+      subject: 'Test Email — WWT Music Club',
+      text:    'Your email settings are working correctly.',
+    });
+    res.json({ ok: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Contact form ───────────────────────────────────────────
+app.post('/api/contact', contactRateLimit, async (req, res) => {
+  const { name, email, message } = req.body;
+  if (!name || !email || !message) return res.status(400).json({ error: 'All fields required' });
+  const c = getEmailConfig();
+  if (!c.senderEmail || !c.appPassword || !c.recipientEmail)
+    return res.status(503).json({ error: 'Contact form is not configured yet' });
+  try {
+    await makeTransporter(c).sendMail({
+      from:    `"WWT Music Club" <${c.senderEmail}>`,
+      to:      c.recipientEmail,
+      replyTo: `"${name}" <${email}>`,
+      subject: `Contact Form — ${name}`,
+      text:    `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+      html:    `<p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p><hr><p>${message.replace(/\n/g, '<br>')}</p>`,
+    });
+    res.json({ ok: true });
+  } catch(err) { res.status(500).json({ error: 'Failed to send message. Please try again later.' }); }
 });
 
 // ── Reset ─────────────────────────────────────────────────

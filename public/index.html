@@ -634,10 +634,10 @@
       <div id="board-members-grid" class="board-members-grid" style="margin-top:2rem"></div>
     </div>
     <div>
-      <div class="contact-field"><label>Your Name</label><input type="text" placeholder="Jane Smith"></div>
-      <div class="contact-field"><label>Email Address</label><input type="email" placeholder="jane@example.com"></div>
-      <div class="contact-field"><label>Message</label><textarea placeholder="Tell us about yourself or ask a question…"></textarea></div>
-      <div style="margin-top:1.2rem"><button class="btn-primary" style="width:100%;display:block;text-align:center;color:#fff;" onclick="showToast('Message sent! We\'ll be in touch.')">Send Message</button></div>
+      <div class="contact-field"><label>Your Name</label><input id="cf-name" type="text" placeholder="Jane Smith"></div>
+      <div class="contact-field"><label>Email Address</label><input id="cf-email" type="email" placeholder="jane@example.com"></div>
+      <div class="contact-field"><label>Message</label><textarea id="cf-message" placeholder="Tell us about yourself or ask a question…"></textarea></div>
+      <div style="margin-top:1.2rem"><button id="cf-submit" class="btn-primary" style="width:100%;display:block;text-align:center;color:#fff;" onclick="sendContactForm()">Send Message</button></div>
     </div>
   </div>
 </section>
@@ -1054,7 +1054,7 @@ function renderAdminTab(tab) {
   else if (tab === 'calendar')   body.innerHTML = renderCalendarTab();
   else if (tab === 'documents')  body.innerHTML = renderDocumentsAdminTab();
   else if (tab === 'board')      body.innerHTML = renderBoardAdminTab();
-  else if (tab === 'settings')   body.innerHTML = renderSettingsTab();
+  else if (tab === 'settings') { body.innerHTML = renderSettingsTab(); loadEmailConfig(); }
 }
 
 // ── CONTENT TAB ──────────────────────────────────────────
@@ -1327,6 +1327,22 @@ function renderSettingsTab() { return `
     </p>
     <button class="admin-btn admin-btn-danger" onclick="resetAll()">⚠ Reset to Defaults</button>
   </div>
+  <div class="admin-section" id="email-config-section">
+    <div class="admin-section-title">Email / Contact Form</div>
+    <p style="color:var(--muted);font-size:.85rem;line-height:1.7;margin-bottom:1.2rem">
+      Configure Google Workspace SMTP so the contact form sends real emails.<br>
+      Use a dedicated sender account and paste its <strong style="color:var(--text)">App Password</strong> below
+      (Google Account → Security → 2-Step Verification → App Passwords).
+    </p>
+    <div class="admin-field"><label>Sender Email</label><input id="ec-sender" type="email" placeholder="noreply@yourdomain.org"></div>
+    <div class="admin-field"><label>App Password</label><input id="ec-password" type="password" placeholder="xxxx xxxx xxxx xxxx" autocomplete="new-password"></div>
+    <div class="admin-field"><label>Deliver Form Submissions To</label><input id="ec-recipient" type="email" placeholder="club@yourdomain.org"></div>
+    <div class="admin-row" style="margin-top:1rem">
+      <button class="admin-btn admin-btn-primary" onclick="saveEmailConfig()">Save</button>
+      <button class="admin-btn admin-btn-outline" onclick="testEmailConfig()">Send Test Email</button>
+    </div>
+    <div id="ec-status" style="margin-top:.8rem;font-size:.8rem;color:var(--muted)"></div>
+  </div>
   <div class="admin-section">
     <div class="admin-section-title">About</div>
     <p style="color:var(--muted);font-size:.8rem;line-height:1.8">
@@ -1336,6 +1352,67 @@ function renderSettingsTab() { return `
     </p>
   </div>
 `; }
+
+// ── EMAIL CONFIG ─────────────────────────────────────────
+async function loadEmailConfig() {
+  try {
+    const c = await api('GET', '/api/email-config');
+    const s = document.getElementById('ec-sender');
+    const p = document.getElementById('ec-password');
+    const r = document.getElementById('ec-recipient');
+    const st = document.getElementById('ec-status');
+    if (s) s.value = c.senderEmail;
+    if (p) p.value = c.appPassword;
+    if (r) r.value = c.recipientEmail;
+    if (st) st.textContent = c.configured ? '✓ Email is configured' : 'Not configured — contact form will not send emails.';
+    if (st) st.style.color = c.configured ? 'var(--accent)' : 'var(--muted)';
+  } catch(e) {}
+}
+
+async function saveEmailConfig() {
+  const body = {
+    senderEmail:    document.getElementById('ec-sender').value.trim(),
+    appPassword:    document.getElementById('ec-password').value,
+    recipientEmail: document.getElementById('ec-recipient').value.trim(),
+  };
+  const st = document.getElementById('ec-status');
+  try {
+    await api('POST', '/api/email-config', body);
+    if (st) { st.textContent = '✓ Saved'; st.style.color = 'var(--accent)'; }
+    showToast('Email settings saved ✓');
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+async function testEmailConfig() {
+  const st = document.getElementById('ec-status');
+  if (st) { st.textContent = 'Sending test email…'; st.style.color = 'var(--muted)'; }
+  try {
+    await api('POST', '/api/email-config/test');
+    if (st) { st.textContent = '✓ Test email sent — check your inbox'; st.style.color = 'var(--accent)'; }
+    showToast('Test email sent ✓');
+  } catch(e) {
+    if (st) { st.textContent = '✗ ' + e.message; st.style.color = '#f08080'; }
+    showToast('Test failed: ' + e.message);
+  }
+}
+
+// ── CONTACT FORM ─────────────────────────────────────────
+async function sendContactForm() {
+  const name    = document.getElementById('cf-name').value.trim();
+  const email   = document.getElementById('cf-email').value.trim();
+  const message = document.getElementById('cf-message').value.trim();
+  if (!name || !email || !message) { showToast('Please fill in all fields'); return; }
+  const btn = document.getElementById('cf-submit');
+  if (btn) btn.disabled = true;
+  try {
+    await api('POST', '/api/contact', { name, email, message });
+    showToast('Message sent! We\'ll be in touch.');
+    document.getElementById('cf-name').value    = '';
+    document.getElementById('cf-email').value   = '';
+    document.getElementById('cf-message').value = '';
+  } catch(e) { showToast('Error: ' + e.message); }
+  if (btn) btn.disabled = false;
+}
 
 async function exportData() {
   try {
