@@ -138,7 +138,6 @@
     position: relative; overflow: hidden; background: var(--surface);
     aspect-ratio: 4/3; cursor: pointer;
   }
-  .gallery-item:first-child { grid-column: span 2; aspect-ratio: 16/9; }
   .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
   .gallery-item:hover img { transform: scale(1.06); }
   .gallery-item .overlay {
@@ -493,7 +492,6 @@
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
     .gallery-grid { grid-template-columns: 1fr 1fr; }
-    .gallery-item:first-child { grid-column: span 2; }
     .about-inner { grid-template-columns: 1fr; }
     .about-img { max-width: 400px; }
     .events-layout { grid-template-columns: 1fr; }
@@ -504,7 +502,6 @@
     nav { padding: 1rem 1.2rem; }
     .nav-links { display: none; }
     .gallery-grid { grid-template-columns: 1fr; }
-    .gallery-item:first-child { grid-column: span 1; aspect-ratio: 4/3; }
     .about-inner, .events-layout, .contact-inner { padding: 4rem 1.2rem; }
     .board-members-grid { grid-template-columns: 1fr; }
   }
@@ -852,7 +849,7 @@ function renderGallery() {
   const grid = document.getElementById('gallery-grid');
   if (!grid || !state.galleryImages) return;
   grid.innerHTML = state.galleryImages.map((img, i) => `
-    <div class="gallery-item"${i===0?' style="grid-column:span 2;aspect-ratio:16/9"':''}>
+    <div class="gallery-item">
       <img src="${img.src}" alt="${img.caption}" loading="lazy" onerror="this.style.display='none'">
       <div class="overlay"></div>
       <div class="caption">${img.caption}</div>
