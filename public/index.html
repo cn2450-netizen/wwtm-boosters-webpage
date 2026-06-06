@@ -1101,7 +1101,7 @@ function renderContentTab() { return `
       <div class="img-upload-zone">
         <input type="file" accept="image/*" onchange="handleAboutImgUpload(event)">
         <span class="upload-icon">📤</span>
-        <div class="upload-hint">Click to upload a new photo<br><small style="opacity:.5">PNG, JPG, GIF — max 8MB</small></div>
+        <div class="upload-hint">Click to upload a new photo<br><small style="opacity:.5">PNG, JPG, GIF — max 25MB</small></div>
       </div>
       <div id="about-upload-progress" style="margin-top:.5rem;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted)"></div>
     </div>
@@ -1160,7 +1160,7 @@ function renderGalleryTab() {
     <div class="img-upload-zone" id="gallery-drop-zone" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor=''" ondrop="handleGalleryDrop(event)">
       <input type="file" id="gallery-file-input" accept="image/*" multiple style="display:none" onchange="handleImageUpload(event)">
       <span class="upload-icon">📤</span>
-      <div class="upload-hint">Drag images here or <span style="color:var(--accent);cursor:pointer" onclick="document.getElementById('gallery-file-input').click()">browse</span><br><small style="opacity:.5">PNG, JPG, GIF — max 8MB per file</small></div>
+      <div class="upload-hint">Drag images here or <span style="color:var(--accent);cursor:pointer" onclick="document.getElementById('gallery-file-input').click()">browse</span><br><small style="opacity:.5">PNG, JPG, GIF — max 25MB per file</small></div>
     </div>
     <div id="upload-progress" style="margin-top:.8rem;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted)"></div>
   </div>
