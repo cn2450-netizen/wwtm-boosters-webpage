@@ -522,6 +522,7 @@
     <a href="#contact">Contact</a>
   </div>
   <a id="student-account-link" href="#" target="_blank" rel="noopener" class="nav-student-btn" style="display:none">Student Account</a>
+  <a id="bylaws-link" href="#" target="_blank" rel="noopener" class="nav-student-btn" style="display:none">ByLaws</a>
   <a id="documents-link" href="#" class="nav-student-btn" style="display:none" onclick="openDocuments();return false;">Documents</a>
   <a id="online-store-link" href="#" target="_blank" rel="noopener" class="nav-student-btn" style="display:none">Online Store</a>
   <button class="nav-admin-btn" onclick="openAdmin()">⚙ Admin</button>
@@ -820,6 +821,8 @@ function applyState() {
   setAttr('social-yt', 'href', state.socialYt);
   const sal = document.getElementById('student-account-link');
   if (sal) { sal.href = state.studentAccountUrl || '#'; sal.style.display = state.studentAccountUrl ? '' : 'none'; }
+  const bl = document.getElementById('bylaws-link');
+  if (bl) { bl.href = state.bylawsUrl || '#'; bl.style.display = state.bylawsUrl ? '' : 'none'; }
   const dl = document.getElementById('documents-link');
   if (dl) dl.style.display = (state.documentTree && state.documentTree.length) ? '' : 'none';
   const osl = document.getElementById('online-store-link');
@@ -1122,6 +1125,7 @@ function renderContentTab() { return `
   <div class="admin-section">
     <div class="admin-section-title">Navigation</div>
     <div class="admin-field"><label>Student Account URL</label><input value="${esc(state.studentAccountUrl)}" placeholder="Leave blank to hide the button" oninput="state.studentAccountUrl=this.value"></div>
+    <div class="admin-field"><label>ByLaws URL</label><input value="${esc(state.bylawsUrl)}" placeholder="Leave blank to hide the button" oninput="state.bylawsUrl=this.value"></div>
     <div class="admin-field"><label>Online Store URL</label><input value="${esc(state.onlineStoreUrl)}" placeholder="Leave blank to hide the button" oninput="state.onlineStoreUrl=this.value"></div>
   </div>
   <button class="admin-btn admin-btn-primary" onclick="saveAndApply()">Save & Apply Changes</button>

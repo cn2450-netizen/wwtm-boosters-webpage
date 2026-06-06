@@ -34,6 +34,7 @@ const DEFAULT_STATE = {
   contactPhone:    '(555) 123-4567',
   socialFb: '#', socialIg: '#', socialYt: '#',
   studentAccountUrl: '',
+  bylawsUrl:         '',
   documentTree: [],
   onlineStoreUrl: '',
   footerCopy:      '© 2025 WWT Music Club. All rights reserved.',
