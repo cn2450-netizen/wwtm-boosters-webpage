@@ -8,13 +8,7 @@ Type=simple
 User=root
 WorkingDirectory=/var/www/wwtmc
 
-# Set one of these:
-# Option 1: Monitor a git repository
-# Environment="SOURCE_REPO=https://github.com/user/wwtmc.git"
-# Environment="CHECK_INTERVAL=3600"
-
-# Option 2: Monitor a local directory
-Environment="SOURCE_DIR=/mnt/updates"
+Environment="SOURCE_REPO=https://github.com/cn2450-netizen/wwtm-boosters-webpage.git"
 Environment="CHECK_INTERVAL=900"
 
 ExecStart=/bin/bash /var/www/wwtmc/auto-update.sh
