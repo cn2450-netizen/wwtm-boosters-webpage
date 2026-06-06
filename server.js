@@ -6,6 +6,7 @@ const bcrypt     = require('bcryptjs');
 const helmet     = require('helmet');
 const multer     = require('multer');
 const nodemailer = require('nodemailer');
+const sharp      = require('sharp');
 const path       = require('path');
 const fs         = require('fs');
 
@@ -92,6 +93,30 @@ function saveAuth(a) { writeJSON(AUTH_FILE, a); }
 
 function getEmailConfig()  { return readJSON(EMAIL_CONFIG_FILE, {}); }
 function saveEmailConfig(c) { writeJSON(EMAIL_CONFIG_FILE, c); }
+
+// Resize image to match the most recent local gallery image's dimensions.
+// Uses cover crop so the result fills the target exactly without distortion.
+async function normaliseGalleryImage(filePath) {
+  const s = getState();
+  const localImages = (s.galleryImages || [])
+    .filter(img => img.src.startsWith('/uploads/'))
+    .slice(-2); // last two in case the newest is the one just saved
+
+  // Find a reference image that exists on disk (skip the file we just uploaded)
+  let ref = null;
+  for (let i = localImages.length - 1; i >= 0; i--) {
+    const candidate = path.join(UPLOADS_DIR, path.basename(localImages[i].src));
+    if (candidate !== filePath && fs.existsSync(candidate)) { ref = candidate; break; }
+  }
+  if (!ref) return; // first upload — becomes the reference, no resize needed
+
+  const { width, height } = await sharp(ref).metadata();
+  if (!width || !height) return;
+
+  const tmp = filePath + '.tmp';
+  await sharp(filePath).resize(width, height, { fit: 'cover', position: 'centre' }).toFile(tmp);
+  fs.renameSync(tmp, filePath);
+}
 
 function makeTransporter(c) {
   return nodemailer.createTransport({
@@ -354,6 +379,8 @@ app.post('/api/gallery/upload', requireAuth, (req, res) => {
     };
     s.galleryImages.push(img);
     saveState(s);
+    const filePath = path.join(UPLOADS_DIR, req.file.filename);
+    normaliseGalleryImage(filePath).catch(() => {}); // resize async, don't block response
     res.json({ ok: true, image: img });
   });
 });
