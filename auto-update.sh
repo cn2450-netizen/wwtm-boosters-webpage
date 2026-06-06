@@ -15,7 +15,7 @@ INSTALL_DIR="/var/www/wwtmc"
 SOURCE_REPO="${SOURCE_REPO:-}"  # Git repo URL (optional)
 SOURCE_DIR="${SOURCE_DIR:-}"    # Local directory to check (optional)
 LOG_FILE="/var/log/wwtmc-auto-update.log"
-CHECK_INTERVAL="${CHECK_INTERVAL:-3600}"  # 1 hour default
+CHECK_INTERVAL="${CHECK_INTERVAL:-900}"   # 15 minutes default
 MAX_LOG_SIZE=10485760  # 10 MB
 
 # Colors

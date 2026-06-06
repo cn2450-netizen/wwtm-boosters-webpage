@@ -15,7 +15,7 @@ WorkingDirectory=/var/www/wwtmc
 
 # Option 2: Monitor a local directory
 Environment="SOURCE_DIR=/mnt/updates"
-Environment="CHECK_INTERVAL=1800"
+Environment="CHECK_INTERVAL=900"
 
 ExecStart=/bin/bash /var/www/wwtmc/auto-update.sh
 
