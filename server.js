@@ -347,6 +347,20 @@ app.delete('/api/gallery/:index', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ── About photo upload ────────────────────────────────────
+app.post('/api/about/upload', requireAuth, upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const s = getState();
+  // Delete old uploaded about image if it was a local file
+  if (s.aboutImgSrc && s.aboutImgSrc.startsWith('/uploads/')) {
+    const oldPath = path.join(UPLOADS_DIR, path.basename(s.aboutImgSrc));
+    fs.unlink(oldPath, () => {});
+  }
+  s.aboutImgSrc = '/uploads/' + req.file.filename;
+  saveState(s);
+  res.json({ ok: true, src: s.aboutImgSrc });
+});
+
 // ── Reset ─────────────────────────────────────────────────
 app.post('/api/reset', requireAuth, (req, res) => {
   saveState(DEFAULT_STATE);

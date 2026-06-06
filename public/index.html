@@ -1091,7 +1091,16 @@ function renderContentTab() { return `
     <div class="admin-field"><label>Badge Label (e.g. 6+)</label><input id="ac-badge" value="${esc(state.aboutBadgeNum)}" oninput="state.aboutBadgeNum=this.value"></div>
     <div class="admin-field"><label>Paragraph 1</label><textarea id="ac-p1" oninput="state.aboutP1=this.value">${esc(state.aboutP1)}</textarea></div>
     <div class="admin-field"><label>Paragraph 2</label><textarea id="ac-p2" oninput="state.aboutP2=this.value">${esc(state.aboutP2)}</textarea></div>
-    <div class="admin-field"><label>About Photo URL</label><input id="ac-aboutimg" value="${esc(state.aboutImgSrc)}" oninput="state.aboutImgSrc=this.value"></div>
+    <div class="admin-field">
+      <label>About Photo</label>
+      <img id="about-img-preview" src="${esc(state.aboutImgSrc)}" alt="About photo preview" style="width:100%;max-height:180px;object-fit:cover;border-radius:6px;margin:.5rem 0">
+      <div class="img-upload-zone">
+        <input type="file" accept="image/*" onchange="handleAboutImgUpload(event)">
+        <span class="upload-icon">📤</span>
+        <div class="upload-hint">Click to upload a new photo<br><small style="opacity:.5">PNG, JPG, GIF — max 8MB</small></div>
+      </div>
+      <div id="about-upload-progress" style="margin-top:.5rem;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted)"></div>
+    </div>
     <div class="admin-row" style="margin-top:.5rem">
       <div style="flex:1"><label style="font-size:.75rem;color:var(--muted)">Stat 1</label><input style="width:100%;margin-top:.3rem" value="${esc(state.stat1)}" oninput="state.stat1=this.value"></div>
       <div style="flex:1"><label style="font-size:.75rem;color:var(--muted)">Stat 2</label><input style="width:100%;margin-top:.3rem" value="${esc(state.stat2)}" oninput="state.stat2=this.value"></div>
@@ -1188,6 +1197,27 @@ async function handleImageUpload(e) {
   await loadState();
   switchAdminTab('gallery');
   showToast(`${files.length} image${files.length>1?'s':''} uploaded ✓`);
+}
+
+async function handleAboutImgUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const prog = document.getElementById('about-upload-progress');
+  if (prog) prog.textContent = `Uploading ${file.name}…`;
+  const form = new FormData();
+  form.append('image', file);
+  try {
+    const res = await fetch('/api/about/upload', { method: 'POST', body: form, credentials: 'same-origin' });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+    const d = await res.json();
+    state.aboutImgSrc = d.src;
+    const preview = document.getElementById('about-img-preview');
+    if (preview) preview.src = d.src;
+    const siteImg = document.getElementById('about-img');
+    if (siteImg) siteImg.src = d.src;
+    showToast('About photo updated ✓');
+  } catch(err) { showToast('Upload failed: ' + err.message); }
+  if (prog) prog.textContent = '';
 }
 
 // ── EVENTS TAB ───────────────────────────────────────────
