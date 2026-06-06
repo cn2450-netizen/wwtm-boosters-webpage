@@ -343,16 +343,19 @@ app.delete('/api/events/:id', requireAuth, (req, res) => {
 // ── Gallery ───────────────────────────────────────────────
 
 // Upload image file
-app.post('/api/gallery/upload', requireAuth, upload.single('image'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const s   = getState();
-  const img = {
-    src:     '/uploads/' + req.file.filename,
-    caption: req.body.caption || req.file.originalname.replace(/\.[^.]+$/, ''),
-  };
-  s.galleryImages.push(img);
-  saveState(s);
-  res.json({ ok: true, image: img });
+app.post('/api/gallery/upload', requireAuth, (req, res) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    const s   = getState();
+    const img = {
+      src:     '/uploads/' + req.file.filename,
+      caption: req.body.caption || req.file.originalname.replace(/\.[^.]+$/, ''),
+    };
+    s.galleryImages.push(img);
+    saveState(s);
+    res.json({ ok: true, image: img });
+  });
 });
 
 // Add image by URL
@@ -383,31 +386,34 @@ app.delete('/api/gallery/:index', requireAuth, (req, res) => {
 });
 
 // ── ByLaws PDF upload ─────────────────────────────────────
-app.post('/api/bylaws/upload', requireAuth, uploadPdf.single('pdf'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const s = getState();
-  // Delete old uploaded bylaws file if it was local
-  if (s.bylawsUrl && s.bylawsUrl.startsWith('/uploads/')) {
-    const oldPath = path.join(UPLOADS_DIR, path.basename(s.bylawsUrl));
-    fs.unlink(oldPath, () => {});
-  }
-  s.bylawsUrl = '/uploads/' + req.file.filename;
-  saveState(s);
-  res.json({ ok: true, src: s.bylawsUrl });
+app.post('/api/bylaws/upload', requireAuth, (req, res) => {
+  uploadPdf.single('pdf')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    const s = getState();
+    if (s.bylawsUrl && s.bylawsUrl.startsWith('/uploads/')) {
+      const oldPath = path.join(UPLOADS_DIR, path.basename(s.bylawsUrl));
+      fs.unlink(oldPath, () => {});
+    }
+    s.bylawsUrl = '/uploads/' + req.file.filename;
+    saveState(s);
+    res.json({ ok: true, src: s.bylawsUrl });
+  });
 });
 
 // ── About photo upload ────────────────────────────────────
-app.post('/api/about/upload', requireAuth, upload.single('image'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const s = getState();
-  // Delete old uploaded about image if it was a local file
-  if (s.aboutImgSrc && s.aboutImgSrc.startsWith('/uploads/')) {
-    const oldPath = path.join(UPLOADS_DIR, path.basename(s.aboutImgSrc));
-    fs.unlink(oldPath, () => {});
-  }
-  s.aboutImgSrc = '/uploads/' + req.file.filename;
-  saveState(s);
-  res.json({ ok: true, src: s.aboutImgSrc });
+app.post('/api/about/upload', requireAuth, (req, res) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    const s = getState();
+    if (s.aboutImgSrc && s.aboutImgSrc.startsWith('/uploads/')) {
+      const oldPath = path.join(UPLOADS_DIR, path.basename(s.aboutImgSrc));
+      fs.unlink(oldPath, () => {});
+    }
+    s.aboutImgSrc = '/uploads/' + req.file.filename;
+    saveState(s);
+    res.json({ ok: true, src: s.aboutImgSrc });
 });
 
 // ── Email config ──────────────────────────────────────────
