@@ -756,7 +756,6 @@
     <div class="admin-tabs">
       <button class="admin-tab active" onclick="switchAdminTab('content')">Content</button>
       <button class="admin-tab" onclick="switchAdminTab('gallery')">Gallery</button>
-      <button class="admin-tab" onclick="switchAdminTab('events')">Events</button>
       <button class="admin-tab" onclick="switchAdminTab('calendar')">Calendar</button>
       <button class="admin-tab" onclick="switchAdminTab('documents')">Documents</button>
       <button class="admin-tab" onclick="switchAdminTab('board')">Board</button>
@@ -1059,7 +1058,7 @@ function closeAdminOutside(e) {
 function switchAdminTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.admin-tab').forEach((b, i) => {
-    const tabs = ['content','gallery','events','calendar','documents','board','settings'];
+    const tabs = ['content','gallery','calendar','documents','board','settings'];
     b.classList.toggle('active', tabs[i] === tab);
   });
   renderAdminTab(tab);
@@ -1069,7 +1068,6 @@ function renderAdminTab(tab) {
   const body = document.getElementById('admin-body');
   if (tab === 'content')  body.innerHTML = renderContentTab();
   else if (tab === 'gallery')  body.innerHTML = renderGalleryTab();
-  else if (tab === 'events')   body.innerHTML = renderEventsTab();
   else if (tab === 'calendar')   body.innerHTML = renderCalendarTab();
   else if (tab === 'documents')  body.innerHTML = renderDocumentsAdminTab();
   else if (tab === 'board')      body.innerHTML = renderBoardAdminTab();
@@ -1262,91 +1260,6 @@ async function handleAboutImgUpload(e) {
   if (prog) prog.textContent = '';
 }
 
-// ── EVENTS TAB ───────────────────────────────────────────
-function renderEventsTab() {
-  const items = (state.events || []).map(ev => `
-    <div class="event-editor-item">
-      <div class="event-editor-info">
-        <div class="ev-title">${esc(ev.title)}</div>
-        <div class="ev-meta">${ev.date} · ${ev.time} · ${esc(ev.location)}</div>
-      </div>
-      <div class="admin-row">
-        <button class="admin-btn admin-btn-outline" style="font-size:.65rem;padding:.4rem .8rem" onclick="editEvent(${ev.id})">Edit</button>
-        <button class="admin-btn admin-btn-danger"  style="font-size:.65rem;padding:.4rem .8rem" onclick="deleteEvent(${ev.id})">Del</button>
-      </div>
-    </div>`).join('');
-  return `
-  <div class="admin-section">
-    <div class="admin-section-title">Current Events</div>
-    ${items || '<p style="color:var(--muted);font-size:.85rem">No events yet.</p>'}
-  </div>
-  <div class="admin-section" id="event-form">
-    <div class="admin-section-title">Add / Edit Event</div>
-    <input type="hidden" id="ev-editing-id" value="">
-    <div class="admin-field"><label>Event Title</label><input id="ev-title" placeholder="e.g. Open Mic Night"></div>
-    <div class="admin-row">
-      <div class="admin-field" style="flex:1"><label>Date</label><input id="ev-date" type="date"></div>
-      <div class="admin-field" style="flex:1"><label>Time</label><input id="ev-time" placeholder="7:00 PM"></div>
-    </div>
-    <div class="admin-field"><label>Location</label><input id="ev-location" placeholder="e.g. The Studio"></div>
-    <div class="admin-field"><label>Tag</label>
-      <select id="ev-tag"><option>Free</option><option>Ticketed</option><option>Members</option><option>Workshop</option></select>
-    </div>
-    <div class="admin-row" style="margin-top:1rem">
-      <button class="admin-btn admin-btn-primary" onclick="saveEvent()">Save Event</button>
-      <button class="admin-btn admin-btn-outline" onclick="clearEventForm()">Clear</button>
-    </div>
-  </div>
-`; }
-
-function editEvent(id) {
-  const ev = (state.events || []).find(e => e.id === id);
-  if (!ev) return;
-  document.getElementById('ev-editing-id').value = id;
-  document.getElementById('ev-title').value    = ev.title;
-  document.getElementById('ev-date').value     = ev.date;
-  document.getElementById('ev-time').value     = ev.time;
-  document.getElementById('ev-location').value = ev.location;
-  document.getElementById('ev-tag').value      = ev.tag;
-  document.getElementById('event-form').scrollIntoView({ behavior: 'smooth' });
-}
-
-async function deleteEvent(id) {
-  if (!confirm('Delete this event?')) return;
-  try {
-    await api('DELETE', `/api/events/${id}`);
-    await loadState();
-    switchAdminTab('events');
-    showToast('Event deleted ✓');
-  } catch(e) { showToast('Error: ' + e.message); }
-}
-
-async function saveEvent() {
-  const title = document.getElementById('ev-title').value.trim();
-  if (!title) { showToast('Event title required'); return; }
-  const editId = parseInt(document.getElementById('ev-editing-id').value);
-  const body   = {
-    title,
-    date:     document.getElementById('ev-date').value     || new Date().toISOString().split('T')[0],
-    time:     document.getElementById('ev-time').value     || '7:00 PM',
-    location: document.getElementById('ev-location').value || 'TBA',
-    tag:      document.getElementById('ev-tag').value,
-  };
-  try {
-    if (editId) await api('PUT',  `/api/events/${editId}`, body);
-    else        await api('POST', '/api/events', body);
-    await loadState();
-    switchAdminTab('events');
-    showToast('Event saved ✓');
-  } catch(e) { showToast('Error: ' + e.message); }
-}
-
-function clearEventForm() {
-  document.getElementById('ev-editing-id').value = '';
-  ['ev-title','ev-date','ev-time','ev-location'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-}
 
 // ── CALENDAR TAB ─────────────────────────────────────────
 function renderCalendarTab() {
