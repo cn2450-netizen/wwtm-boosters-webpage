@@ -653,6 +653,26 @@
   </div>
 </footer>
 
+<!-- ── MEMBER CONTACT MODAL ── -->
+<div id="member-contact-overlay" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);align-items:center;justify-content:center" onclick="if(event.target===this)closeMemberContact()">
+  <div style="width:min(480px,95vw);background:#0d0d12;border:1px solid var(--border);animation:authIn .3s ease">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.8rem;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--accent);letter-spacing:.2em;text-transform:uppercase">Contact</div>
+        <div id="mcm-member-name" style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.05em;margin-top:.2rem"></div>
+      </div>
+      <button class="admin-close" onclick="closeMemberContact()">✕</button>
+    </div>
+    <div style="padding:1.5rem 1.8rem">
+      <div class="contact-field"><label>Your Name</label><input id="mcm-name" type="text" placeholder="Jane Smith"></div>
+      <div class="contact-field"><label>Your Email</label><input id="mcm-email" type="email" placeholder="jane@example.com"></div>
+      <div class="contact-field"><label>Message</label><textarea id="mcm-message" placeholder="Type your message…" style="height:120px"></textarea></div>
+      <input type="hidden" id="mcm-to">
+      <button id="mcm-submit" class="btn-primary" style="width:100%;margin-top:1rem;display:block;text-align:center;color:#fff" onclick="sendMemberContact()">Send Message</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── TOAST ── -->
 <div id="toast"></div>
 
@@ -865,7 +885,7 @@ function renderBoardMembers() {
     <div class="board-member-card">
       <div class="board-member-name">${esc(m.name)}</div>
       <div class="board-member-title">${esc(m.title)}</div>
-      <a href="mailto:${esc(m.email)}" class="board-member-btn">Contact</a>
+      <button class="board-member-btn" onclick="openMemberContact('${esc(m.name)}','${esc(m.email)}')">Contact</button>
     </div>`).join('');
 }
 
@@ -1394,6 +1414,37 @@ async function testEmailConfig() {
     if (st) { st.textContent = '✗ ' + e.message; st.style.color = '#f08080'; }
     showToast('Test failed: ' + e.message);
   }
+}
+
+// ── MEMBER CONTACT MODAL ─────────────────────────────────
+function openMemberContact(name, email) {
+  document.getElementById('mcm-member-name').textContent = name;
+  document.getElementById('mcm-to').value   = email;
+  document.getElementById('mcm-name').value    = '';
+  document.getElementById('mcm-email').value   = '';
+  document.getElementById('mcm-message').value = '';
+  const overlay = document.getElementById('member-contact-overlay');
+  overlay.style.display = 'flex';
+}
+
+function closeMemberContact() {
+  document.getElementById('member-contact-overlay').style.display = 'none';
+}
+
+async function sendMemberContact() {
+  const name    = document.getElementById('mcm-name').value.trim();
+  const email   = document.getElementById('mcm-email').value.trim();
+  const message = document.getElementById('mcm-message').value.trim();
+  const to      = document.getElementById('mcm-to').value;
+  if (!name || !email || !message) { showToast('Please fill in all fields'); return; }
+  const btn = document.getElementById('mcm-submit');
+  if (btn) btn.disabled = true;
+  try {
+    await api('POST', '/api/contact', { name, email, message, to });
+    showToast('Message sent ✓');
+    closeMemberContact();
+  } catch(e) { showToast('Error: ' + e.message); }
+  if (btn) btn.disabled = false;
 }
 
 // ── CONTACT FORM ─────────────────────────────────────────

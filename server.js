@@ -448,15 +448,26 @@ app.post('/api/email-config/test', requireAuth, async (req, res) => {
 
 // ── Contact form ───────────────────────────────────────────
 app.post('/api/contact', contactRateLimit, async (req, res) => {
-  const { name, email, message } = req.body;
+  const { name, email, message, to } = req.body;
   if (!name || !email || !message) return res.status(400).json({ error: 'All fields required' });
   const c = getEmailConfig();
   if (!c.senderEmail || !c.appPassword || !c.recipientEmail)
     return res.status(503).json({ error: 'Contact form is not configured yet' });
+
+  // If a specific recipient is requested, validate it is a known board member email
+  let recipient = c.recipientEmail;
+  if (to) {
+    const memberEmails = (getState().boardMembers || []).map(m => m.email.toLowerCase());
+    if (!memberEmails.includes(to.toLowerCase())) {
+      return res.status(400).json({ error: 'Invalid recipient' });
+    }
+    recipient = to;
+  }
+
   try {
     await makeTransporter(c).sendMail({
       from:    `"WWT Music Club" <${c.senderEmail}>`,
-      to:      c.recipientEmail,
+      to:      recipient,
       replyTo: `"${name}" <${email}>`,
       subject: `Contact Form — ${name}`,
       text:    `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
