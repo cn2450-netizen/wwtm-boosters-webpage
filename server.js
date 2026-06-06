@@ -414,6 +414,7 @@ app.post('/api/about/upload', requireAuth, (req, res) => {
     s.aboutImgSrc = '/uploads/' + req.file.filename;
     saveState(s);
     res.json({ ok: true, src: s.aboutImgSrc });
+  });
 });
 
 // ── Email config ──────────────────────────────────────────
