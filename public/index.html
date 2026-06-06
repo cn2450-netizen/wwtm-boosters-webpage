@@ -1125,7 +1125,18 @@ function renderContentTab() { return `
   <div class="admin-section">
     <div class="admin-section-title">Navigation</div>
     <div class="admin-field"><label>Student Account URL</label><input value="${esc(state.studentAccountUrl)}" placeholder="Leave blank to hide the button" oninput="state.studentAccountUrl=this.value"></div>
-    <div class="admin-field"><label>ByLaws URL</label><input value="${esc(state.bylawsUrl)}" placeholder="Leave blank to hide the button" oninput="state.bylawsUrl=this.value"></div>
+    <div class="admin-field">
+      <label>ByLaws PDF</label>
+      ${state.bylawsUrl
+        ? `<div style="margin:.5rem 0;font-size:.8rem;color:var(--muted)">Current: <a href="${esc(state.bylawsUrl)}" target="_blank" style="color:var(--accent)">${esc(state.bylawsUrl.split('/').pop())}</a></div>`
+        : `<div style="margin:.5rem 0;font-size:.8rem;color:var(--muted)">No file uploaded — button hidden until a PDF is uploaded.</div>`}
+      <div class="img-upload-zone">
+        <input type="file" accept="application/pdf" onchange="handleBylawsUpload(event)">
+        <span class="upload-icon">📄</span>
+        <div class="upload-hint">Click to upload ByLaws PDF<br><small style="opacity:.5">PDF only — max 20MB</small></div>
+      </div>
+      <div id="bylaws-upload-progress" style="margin-top:.5rem;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted)"></div>
+    </div>
     <div class="admin-field"><label>Online Store URL</label><input value="${esc(state.onlineStoreUrl)}" placeholder="Leave blank to hide the button" oninput="state.onlineStoreUrl=this.value"></div>
   </div>
   <button class="admin-btn admin-btn-primary" onclick="saveAndApply()">Save & Apply Changes</button>
@@ -1201,6 +1212,26 @@ async function handleImageUpload(e) {
   await loadState();
   switchAdminTab('gallery');
   showToast(`${files.length} image${files.length>1?'s':''} uploaded ✓`);
+}
+
+async function handleBylawsUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const prog = document.getElementById('bylaws-upload-progress');
+  if (prog) prog.textContent = `Uploading ${file.name}…`;
+  const form = new FormData();
+  form.append('pdf', file);
+  try {
+    const res = await fetch('/api/bylaws/upload', { method: 'POST', body: form, credentials: 'same-origin' });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+    const d = await res.json();
+    state.bylawsUrl = d.src;
+    const bl = document.getElementById('bylaws-link');
+    if (bl) { bl.href = d.src; bl.style.display = ''; }
+    showToast('ByLaws PDF uploaded ✓');
+    switchAdminTab('content');
+  } catch(err) { showToast('Upload failed: ' + err.message); }
+  if (prog) prog.textContent = '';
 }
 
 async function handleAboutImgUpload(e) {

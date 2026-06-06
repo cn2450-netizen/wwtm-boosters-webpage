@@ -105,6 +105,15 @@ const upload = multer({
   },
 });
 
+const uploadPdf = multer({
+  storage,
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype === 'application/pdf') cb(null, true);
+    else cb(new Error('Only PDF files allowed'));
+  },
+});
+
 // ─── Middleware ──────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: false, // disabled so the HTML page can load external fonts/images
@@ -346,6 +355,20 @@ app.delete('/api/gallery/:index', requireAuth, (req, res) => {
   s.galleryImages.splice(idx, 1);
   saveState(s);
   res.json({ ok: true });
+});
+
+// ── ByLaws PDF upload ─────────────────────────────────────
+app.post('/api/bylaws/upload', requireAuth, uploadPdf.single('pdf'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const s = getState();
+  // Delete old uploaded bylaws file if it was local
+  if (s.bylawsUrl && s.bylawsUrl.startsWith('/uploads/')) {
+    const oldPath = path.join(UPLOADS_DIR, path.basename(s.bylawsUrl));
+    fs.unlink(oldPath, () => {});
+  }
+  s.bylawsUrl = '/uploads/' + req.file.filename;
+  saveState(s);
+  res.json({ ok: true, src: s.bylawsUrl });
 });
 
 // ── About photo upload ────────────────────────────────────
