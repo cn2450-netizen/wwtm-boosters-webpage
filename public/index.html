@@ -1691,6 +1691,10 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// Prevent browser from opening dropped files anywhere on the page
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop',     e => e.preventDefault());
+
 // ── INIT ─────────────────────────────────────────────────
 loadState();
 
