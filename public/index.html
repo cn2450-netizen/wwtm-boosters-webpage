@@ -236,7 +236,8 @@
     padding: 2rem 2.5rem; background: var(--bg); border-top: 1px solid var(--border);
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
   }
-  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent); letter-spacing: .1em; }
+  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent); letter-spacing: .1em; transition: color .2s, transform .2s; }
+  .footer-logo:hover { color: var(--accent2); transform: translateY(-2px); }
   .footer-copy { font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--muted); }
   .footer-links { display: flex; gap: 1.5rem; }
   .footer-links a { font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--muted); text-decoration: none; }
@@ -513,7 +514,6 @@
   <a id="bylaws-link" href="#" target="_blank" rel="noopener" class="nav-student-btn" style="display:none">ByLaws</a>
   <a id="documents-link" href="#" class="nav-student-btn" style="display:none" onclick="openDocuments();return false;">Documents</a>
   <a id="online-store-link" href="#" target="_blank" rel="noopener" class="nav-student-btn" style="display:none">Online Store</a>
-  <button class="nav-admin-btn" onclick="openAdmin()">⚙ Admin</button>
 </nav>
 
 <!-- ── HERO ── -->
@@ -626,7 +626,7 @@
 
 <!-- ── FOOTER ── -->
 <footer>
-  <div class="footer-logo" id="footer-logo">WWT Music Club</div>
+  <div class="footer-logo" id="footer-logo" style="cursor:pointer;transition:color .2s" onclick="openAdmin()" title="Admin Access">WWT Music Boosters</div>
   <div class="footer-copy" id="footer-copy">© 2025 WWT Music Club. All rights reserved.</div>
   <div class="footer-links">
     <a href="#" id="social-fb">Facebook</a>
