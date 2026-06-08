@@ -185,6 +185,10 @@ When you have new code, use the update script to apply it without losing data:
 
 ```bash
 sudo bash update.sh /path/to/new/wwtmc
+
+## this pull the code and updates in one pass
+sudo git -C /var/www/wwtmc fetch origin && sudo git -C /var/www/wwtmc checkout -f origin/main && sudo systemctl restart wwtmc
+
 ```
 
 It will:
