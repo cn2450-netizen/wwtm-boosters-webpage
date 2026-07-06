@@ -565,7 +565,6 @@
   <div class="hero-grid"></div>
   <div class="hero-glow"></div>
   <div class="hero-content">
-    <div class="hero-eyebrow" id="hero-eyebrow">Est. 2018 &nbsp;·&nbsp; Live Music &nbsp;·&nbsp; Community</div>
     <h1 class="hero-title" id="hero-title">WWT<br><span>MUSIC</span><br>CLUB</h1>
     <p class="hero-sub" id="hero-sub">A passionate community of musicians and music lovers coming together to celebrate the art of live performance.</p>
     <div class="hero-ctas">
@@ -831,7 +830,6 @@ function applyState() {
   setT('club-name-nav', state.clubName);
   setT('footer-logo',   state.clubName);
   setT('footer-copy',   state.footerCopy);
-  setT('hero-eyebrow',  state.heroEyebrow);
   setT('hero-sub',      state.heroSub);
   setT('about-p1',      state.aboutP1);
   setT('about-p2',      state.aboutP2);
@@ -1111,7 +1109,6 @@ function renderContentTab() { return `
   </div>
   <div class="admin-section">
     <div class="admin-section-title">Hero Section</div>
-    <div class="admin-field"><label>Eyebrow Text</label><input id="ac-eyebrow" value="${esc(state.heroEyebrow)}" oninput="state.heroEyebrow=this.value"></div>
     <div class="admin-field"><label>Hero Title (one line per row)</label><textarea id="ac-title" oninput="state.heroTitle=this.value">${esc(state.heroTitle)}</textarea></div>
     <div class="admin-field"><label>Subtitle</label><textarea id="ac-sub" oninput="state.heroSub=this.value">${esc(state.heroSub)}</textarea></div>
   </div>
