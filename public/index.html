@@ -843,9 +843,12 @@ function applyState() {
   setT('contact-email',    state.contactEmail);
   setT('contact-location', state.contactLocation);
   setT('contact-phone',    state.contactPhone);
-  setAttr('social-fb', 'href', state.socialFb);
-  setAttr('social-ig', 'href', state.socialIg);
-  setAttr('social-yt', 'href', state.socialYt);
+  const fbEl = document.getElementById('social-fb');
+  if (fbEl) { fbEl.href = state.socialFb || '#'; fbEl.style.display = state.socialFbEnabled === false ? 'none' : ''; }
+  const igEl = document.getElementById('social-ig');
+  if (igEl) { igEl.href = state.socialIg || '#'; igEl.style.display = state.socialIgEnabled === false ? 'none' : ''; }
+  const ytEl = document.getElementById('social-yt');
+  if (ytEl) { ytEl.href = state.socialYt || '#'; ytEl.style.display = state.socialYtEnabled === false ? 'none' : ''; }
   const sal = document.getElementById('student-account-link');
   if (sal) { sal.href = state.studentAccountUrl || '#'; sal.style.display = state.studentAccountUrl ? '' : 'none'; }
   const bl = document.getElementById('bylaws-link');
@@ -1144,9 +1147,27 @@ function renderContentTab() { return `
   </div>
   <div class="admin-section">
     <div class="admin-section-title">Social Links</div>
-    <div class="admin-field"><label>Facebook URL</label><input value="${esc(state.socialFb)}" oninput="state.socialFb=this.value"></div>
-    <div class="admin-field"><label>Instagram URL</label><input value="${esc(state.socialIg)}" oninput="state.socialIg=this.value"></div>
-    <div class="admin-field"><label>YouTube URL</label><input value="${esc(state.socialYt)}" oninput="state.socialYt=this.value"></div>
+    <div class="admin-field">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">
+        <input type="checkbox" id="ac-fb-enabled" ${state.socialFbEnabled !== false ? 'checked' : ''} onchange="state.socialFbEnabled=this.checked" style="width:auto;accent-color:var(--accent)">
+        <label for="ac-fb-enabled" style="margin:0;cursor:pointer">Show Facebook link</label>
+      </div>
+      <input value="${esc(state.socialFb)}" oninput="state.socialFb=this.value" placeholder="Facebook URL">
+    </div>
+    <div class="admin-field">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">
+        <input type="checkbox" id="ac-ig-enabled" ${state.socialIgEnabled !== false ? 'checked' : ''} onchange="state.socialIgEnabled=this.checked" style="width:auto;accent-color:var(--accent)">
+        <label for="ac-ig-enabled" style="margin:0;cursor:pointer">Show Instagram link</label>
+      </div>
+      <input value="${esc(state.socialIg)}" oninput="state.socialIg=this.value" placeholder="Instagram URL">
+    </div>
+    <div class="admin-field">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">
+        <input type="checkbox" id="ac-yt-enabled" ${state.socialYtEnabled !== false ? 'checked' : ''} onchange="state.socialYtEnabled=this.checked" style="width:auto;accent-color:var(--accent)">
+        <label for="ac-yt-enabled" style="margin:0;cursor:pointer">Show YouTube link</label>
+      </div>
+      <input value="${esc(state.socialYt)}" oninput="state.socialYt=this.value" placeholder="YouTube URL">
+    </div>
   </div>
   <div class="admin-section">
     <div class="admin-section-title">Navigation</div>

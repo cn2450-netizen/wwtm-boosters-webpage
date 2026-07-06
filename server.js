@@ -36,6 +36,7 @@ const DEFAULT_STATE = {
   contactLocation: '123 Main Street, Anytown, USA',
   contactPhone:    '(555) 123-4567',
   socialFb: '#', socialIg: '#', socialYt: '#',
+  socialFbEnabled: true, socialIgEnabled: true, socialYtEnabled: true,
   studentAccountUrl: '',
   bylawsUrl:         '',
   documentTree: [],
