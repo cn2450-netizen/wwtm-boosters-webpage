@@ -630,8 +630,7 @@
 <!-- ── EVENTS ── -->
 <section id="events">
   <div class="section-header">
-    <p class="section-tag">What's On</p>
-    <h2 class="section-title">Upcoming <em>Events</em><span id="cal-live-badge" style="display:none;font-family:'Space Mono',monospace;font-size:.6rem;color:var(--accent);letter-spacing:.12em;border:1px solid var(--accent);padding:.2rem .7rem;margin-left:1.2rem;vertical-align:middle;opacity:.85">● LIVE</span></h2>
+    <h2 class="section-title">Upcoming <em>Events</em></h2>
   </div>
   <div class="events-layout">
     <div class="event-list" id="event-list"></div>
@@ -1364,8 +1363,6 @@ async function clearCalendar() {
     await saveStateToServer();
     applyState();
     renderEventList();
-    const badge = document.getElementById('cal-live-badge');
-    if (badge) badge.style.display = 'none';
     switchAdminTab('calendar');
   } catch(e) { showToast('Error: ' + e.message); }
 }
@@ -1576,10 +1573,8 @@ let _calRefreshTimer = null;
 async function loadCalendarEvents() {
   try {
     const data  = await api('GET', '/api/calendar/events');
-    const badge = document.getElementById('cal-live-badge');
     if (data.events && data.events.length) {
       renderEventListFromData(data.events);
-      if (badge) badge.style.display = '';
     } else {
       // Calendar is configured but has no upcoming events
       if (state.calendarIcsUrl) {
