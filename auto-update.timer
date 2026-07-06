@@ -5,7 +5,7 @@ Requires=auto-update.service
 [Timer]
 # Check for updates every 2 hours
 OnBootSec=5min
-OnUnitActiveSec=2h
+OnUnitActiveSec=15min
 
 # Or use these for specific times:
 # OnCalendar=*-*-* 00,06,12,18:00:00  (every 6 hours at midnight, 6am, noon, 6pm)
