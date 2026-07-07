@@ -1615,9 +1615,24 @@ function renderEventListFromData(events) {
     const d     = new Date(ev.date + 'T12:00:00');
     const day   = d.getDate();
     const month = d.toLocaleString('default', { month: 'short' }).toUpperCase();
+
+    let dateBlock;
+    if (ev.endDate) {
+      const endD     = new Date(ev.endDate + 'T12:00:00');
+      const endDay   = endD.getDate();
+      const endMonth = endD.toLocaleString('default', { month: 'short' }).toUpperCase();
+      if (endMonth === month) {
+        dateBlock = `<div class="day" style="font-size:2rem">${day}–${endDay}</div><div class="month">${month}</div>`;
+      } else {
+        dateBlock = `<div class="day" style="font-size:1.1rem;line-height:1.3">${month} ${day}<br>${endMonth} ${endDay}</div>`;
+      }
+    } else {
+      dateBlock = `<div class="day">${day}</div><div class="month">${month}</div>`;
+    }
+
     return `
       <div class="event-card">
-        <div class="event-date"><div class="day">${day}</div><div class="month">${month}</div></div>
+        <div class="event-date">${dateBlock}</div>
         <div class="event-info">
           <div class="event-title">${esc(ev.title)}</div>
           <div class="event-meta"><span>${esc(ev.time)}</span><span>${esc(ev.location)}</span></div>

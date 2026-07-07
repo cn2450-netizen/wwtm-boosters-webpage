@@ -538,14 +538,36 @@ app.get('/api/calendar/events', async (req, res) => {
 
     const upcoming = allEvs
       .map(ev => {
-        const dateStr = icsDateStr(ev['DTSTART']);
+        const dtstart  = ev['DTSTART'] || '';
+        const dateStr  = icsDateStr(dtstart);
         if (!dateStr) return null;
         if (dateStr < todayStr) return null;
+
+        // Resolve end date for multi-day events
+        const dtend      = ev['DTEND'] || '';
+        const isAllDay   = !dtstart.includes('T');
+        let endDate      = null;
+        if (dtend) {
+          const endDateStr = icsDateStr(dtend);
+          if (endDateStr && endDateStr > dateStr) {
+            if (isAllDay) {
+              // DTEND is exclusive for all-day events — step back one day
+              const d = new Date(endDateStr + 'T12:00:00');
+              d.setDate(d.getDate() - 1);
+              const last = d.toISOString().split('T')[0];
+              if (last > dateStr) endDate = last;
+            } else {
+              endDate = endDateStr;
+            }
+          }
+        }
+
         return {
           id:       ev['UID'] || `${now}-${Math.random()}`,
           title:    (ev['SUMMARY']  || 'Untitled').replace(/\\,/g, ',').replace(/\\n/g, ' '),
           date:     dateStr,
-          time:     icsTimeStr(ev['DTSTART']),
+          endDate:  endDate || undefined,
+          time:     icsTimeStr(dtstart),
           location: (ev['LOCATION'] || 'TBA').replace(/\\,/g, ',').replace(/\\n/g, ' '),
           tag:      'Event',
         };
