@@ -6,12 +6,12 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/var/www/wwtmc
+WorkingDirectory=/opt/wwtmc
 
 Environment="SOURCE_REPO=https://github.com/cn2450-netizen/wwtm-boosters-webpage.git"
 Environment="CHECK_INTERVAL=900"
 
-ExecStart=/bin/bash /var/www/wwtmc/auto-update.sh
+ExecStart=/bin/bash /opt/wwtmc/auto-update.sh
 
 # Restart policy
 Restart=always

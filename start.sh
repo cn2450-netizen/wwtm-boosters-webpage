@@ -2,7 +2,7 @@
 # WWT Music Club — Start Server (Background)
 # Runs the Node.js server in the background and logs output
 
-cd /var/www/wwtmc
+cd /opt/wwtmc
 
 # Create log directory if it doesn't exist
 mkdir -p logs
@@ -29,4 +29,4 @@ echo "✅ Server started in background"
 echo "📝 Logs: $LOG_FILE"
 echo "📊 View logs: tail -f logs/wwtmc-latest.log"
 echo "🛑 Stop server: pkill -f 'node server.js'"
-echo "🌐 Access: http://localhost:3000"
+echo "🌐 Access: http://localhost:3001"

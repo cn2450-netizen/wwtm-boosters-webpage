@@ -25,7 +25,7 @@ if [ -z "$1" ]; then
 fi
 
 SOURCE_DIR="$1"
-INSTALL_DIR="/var/www/wwtmc"
+INSTALL_DIR="/opt/wwtmc"
 
 if [ ! -f "$SOURCE_DIR/server.js" ]; then
   echo -e "${RED}✗ $SOURCE_DIR/server.js not found${NC}"

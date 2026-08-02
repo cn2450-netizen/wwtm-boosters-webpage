@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 User=www-data
-WorkingDirectory=/var/www/wwtmc
+WorkingDirectory=/opt/wwtmc
 ExecStart=/usr/bin/node server.js
 Restart=on-failure
 RestartSec=5
@@ -15,7 +15,7 @@ SyslogIdentifier=wwtmc
 
 # Environment
 Environment=NODE_ENV=production
-Environment=PORT=3000
+Environment=PORT=3001
 # IMPORTANT: Change this to a long random string in production!
 Environment=SESSION_SECRET=change-this-to-a-long-random-secret
 

@@ -69,12 +69,12 @@ Best for: Running on a schedule via cron
 
 ```bash
 # One-time check
-SOURCE_DIR=/mnt/updates bash /var/www/wwtmc/auto-update.sh once
+SOURCE_DIR=/mnt/updates bash /opt/wwtmc/auto-update.sh once
 
 # Add to crontab for every 4 hours
 sudo crontab -e
 # Add this line:
-0 */4 * * * SOURCE_DIR=/mnt/updates bash /var/www/wwtmc/auto-update.sh once >> /var/log/wwtmc-auto-update.log 2>&1
+0 */4 * * * SOURCE_DIR=/mnt/updates bash /opt/wwtmc/auto-update.sh once >> /var/log/wwtmc-auto-update.log 2>&1
 ```
 
 **Pros:**
@@ -291,8 +291,8 @@ sudo nano /etc/systemd/system/auto-update.service
 df -h
 
 # Clear old backups
-sudo ls -lh /var/www/wwtmc/data/state.json.backup.*
-sudo rm /var/www/wwtmc/data/state.json.backup.* # Keep recent ones!
+sudo ls -lh /opt/wwtmc/data/state.json.backup.*
+sudo rm /opt/wwtmc/data/state.json.backup.* # Keep recent ones!
 ```
 
 ---
@@ -335,7 +335,7 @@ sudo systemctl start auto-update
 # 1. Copy the files
 sudo cp auto-update.service /etc/systemd/system/
 sudo cp auto-update.timer /etc/systemd/system/
-sudo cp auto-update.sh /var/www/wwtmc/
+sudo cp auto-update.sh /opt/wwtmc/
 
 # 2. Edit the service
 sudo tee /etc/systemd/system/auto-update.service > /dev/null <<EOF
@@ -348,7 +348,7 @@ Wants=network-online.target
 Type=oneshot
 User=root
 Environment="SOURCE_REPO=https://github.com/your-org/wwtmc.git"
-ExecStart=/bin/bash /var/www/wwtmc/auto-update.sh once
+ExecStart=/bin/bash /opt/wwtmc/auto-update.sh once
 StandardOutput=journal
 StandardError=journal
 

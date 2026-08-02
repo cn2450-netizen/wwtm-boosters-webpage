@@ -35,7 +35,7 @@ sudo bash install.sh /path/to/wwtmc
 - **OS:** Ubuntu 20.04+, Debian 11+, or any modern Linux (incl. WSL)
 - **Access:** Root or sudo
 - **Disk:** ~500MB free space
-- **Network:** Port 3000 (or 80/443 if using Nginx)
+- **Network:** Port 3001 (or 80/443 if using Nginx)
 
 ---
 
@@ -82,29 +82,29 @@ node -v  # verify: should be v20.x.x
 ### Step 2: Create directories and copy files
 
 ```bash
-sudo mkdir -p /var/www/wwtmc
-sudo cp -r /tmp/wwtmc/* /var/www/wwtmc/
+sudo mkdir -p /opt/wwtmc
+sudo cp -r /tmp/wwtmc/* /opt/wwtmc/
 ```
 
 ### Step 3: Install npm dependencies
 
 ```bash
-cd /var/www/wwtmc
+cd /opt/wwtmc
 sudo npm install --omit=dev
 ```
 
 ### Step 4: Set permissions
 
 ```bash
-sudo chown -R www-data:www-data /var/www/wwtmc
-sudo chmod -R 755 /var/www/wwtmc
+sudo chown -R www-data:www-data /opt/wwtmc
+sudo chmod -R 755 /opt/wwtmc
 ```
 
 ### Step 5: Set up the systemd service
 
 ```bash
 # Copy the service file
-sudo cp /var/www/wwtmc/wwtmc.service /etc/systemd/system/
+sudo cp /opt/wwtmc/wwtmc.service /etc/systemd/system/
 
 # Generate a random session secret
 SESSION_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
@@ -129,10 +129,10 @@ sudo systemctl status wwtmc
 sudo journalctl -u wwtmc -f
 
 # Test the site
-curl http://localhost:3000
+curl http://localhost:3001
 ```
 
-The site is now live at **http://your-server-ip:3000**
+The site is now live at **http://your-server-ip:3001**
 
 ### Step 7: (Optional) Set up Nginx
 
@@ -142,7 +142,7 @@ For a cleaner URL and HTTPS support:
 sudo apt install -y nginx
 
 # Copy and customize the config
-sudo cp /var/www/wwtmc/nginx.conf /etc/nginx/sites-available/wwtmc
+sudo cp /opt/wwtmc/nginx.conf /etc/nginx/sites-available/wwtmc
 sudo nano /etc/nginx/sites-available/wwtmc
 # Change "yourdomain.com" to your actual domain
 
@@ -187,7 +187,7 @@ When you have new code, use the update script to apply it without losing data:
 sudo bash update.sh /path/to/new/wwtmc
 
 ## this pull the code and updates in one pass
-sudo git -C /var/www/wwtmc fetch origin && sudo git -C /var/www/wwtmc checkout -f origin/main && sudo systemctl restart wwtmc
+sudo git -C /opt/wwtmc fetch origin && sudo git -C /opt/wwtmc checkout -f origin/main && sudo systemctl restart wwtmc
 
 ```
 
@@ -235,19 +235,19 @@ sudo systemctl enable wwtmc
 
 ```bash
 # Start in background
-bash /var/www/wwtmc/start.sh
+bash /opt/wwtmc/start.sh
 
 # View logs
-tail -f /var/www/wwtmc/logs/wwtmc-latest.log
+tail -f /opt/wwtmc/logs/wwtmc-latest.log
 
 # Stop
-bash /var/www/wwtmc/stop.sh
+bash /opt/wwtmc/stop.sh
 ```
 
 ### Manual (Foreground, for debugging)
 
 ```bash
-cd /var/www/wwtmc
+cd /opt/wwtmc
 node server.js
 
 # Press Ctrl+C to stop
@@ -260,7 +260,7 @@ node server.js
 ### Where Your Data Lives
 
 ```
-/var/www/wwtmc/
+/opt/wwtmc/
 ├── data/
 │   ├── state.json    ← ALL SITE CONTENT (edit times, images, text, etc.)
 │   └── auth.json     ← Password hash (DO NOT SHARE)
@@ -272,7 +272,7 @@ node server.js
 
 **Method 1: Manual**
 ```bash
-sudo cp /var/www/wwtmc/data/state.json ~/wwtmc-backup-$(date +%Y%m%d).json
+sudo cp /opt/wwtmc/data/state.json ~/wwtmc-backup-$(date +%Y%m%d).json
 ```
 
 **Method 2: Admin Panel**
@@ -280,14 +280,14 @@ sudo cp /var/www/wwtmc/data/state.json ~/wwtmc-backup-$(date +%Y%m%d).json
 
 **Method 3: Full directory**
 ```bash
-sudo tar -czf ~/wwtmc-backup-$(date +%Y%m%d).tar.gz /var/www/wwtmc/data/
+sudo tar -czf ~/wwtmc-backup-$(date +%Y%m%d).tar.gz /opt/wwtmc/data/
 ```
 
 ### Restore from Backup
 
 ```bash
 # Restore state.json
-sudo cp ~/wwtmc-backup-20250610.json /var/www/wwtmc/data/state.json
+sudo cp ~/wwtmc-backup-20250610.json /opt/wwtmc/data/state.json
 sudo systemctl restart wwtmc
 ```
 
@@ -310,7 +310,7 @@ The events list will now auto-sync with Google Calendar every 2 minutes (configu
 1. **Change the default password immediately** (you'll be forced to on first login)
 2. **Use HTTPS** — set up Let's Encrypt (see Step 8 above)
 3. **Set `secure: true`** in `server.js` session cookie once HTTPS is active
-4. **Firewall:** Don't expose port 3000 to the internet; use Nginx instead
+4. **Firewall:** Don't expose port 3001 to the internet; use Nginx instead
 5. **Backups:** Keep regular backups of `state.json`
 6. **Updates:** Update Node.js periodically (currently v20.x)
 
@@ -324,19 +324,19 @@ The events list will now auto-sync with Google Calendar every 2 minutes (configu
 sudo journalctl -u wwtmc -n 30
 
 # Check permissions
-ls -la /var/www/wwtmc/data/
-sudo chown -R www-data:www-data /var/www/wwtmc/data
+ls -la /opt/wwtmc/data/
+sudo chown -R www-data:www-data /opt/wwtmc/data
 ```
 
 ### Permission denied on data directory
 ```bash
-sudo chmod -R 775 /var/www/wwtmc/data
-sudo chmod -R 775 /var/www/wwtmc/public/uploads
+sudo chmod -R 775 /opt/wwtmc/data
+sudo chmod -R 775 /opt/wwtmc/public/uploads
 ```
 
-### Port 3000 already in use
+### Port 3001 already in use
 ```bash
-sudo lsof -i :3000
+sudo lsof -i :3001
 # Kill the process using it, then restart
 ```
 
@@ -362,7 +362,7 @@ sudo tail -f /var/log/nginx/error.log
 ## File Structure
 
 ```
-/var/www/wwtmc/
+/opt/wwtmc/
 ├── server.js              ← Express app (main backend)
 ├── package.json           ← Node dependencies
 ├── package-lock.json      ← Locked versions
@@ -388,7 +388,7 @@ Optional — set these in the systemd service file:
 
 ```bash
 # In /etc/systemd/system/wwtmc.service
-Environment=PORT=3000
+Environment=PORT=3001
 Environment=SESSION_SECRET=your-random-secret-here
 ```
 

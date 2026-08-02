@@ -38,7 +38,7 @@ if [ -z "$1" ]; then
 fi
 
 SOURCE_INPUT="$1"
-INSTALL_DIR="/var/www/wwtmc"
+INSTALL_DIR="/opt/wwtmc"
 
 # Detect if source is a git URL or local directory
 if [[ "$SOURCE_INPUT" == http* ]] || [[ "$SOURCE_INPUT" == git@* ]]; then
@@ -167,7 +167,7 @@ echo -e "The application is installed at: ${YELLOW}$INSTALL_DIR${NC}"
 echo ""
 echo -e "Access the site:"
 if systemctl is-active --quiet wwtmc; then
-  echo -e "  • Local (port 3000):    ${YELLOW}http://localhost:3000${NC}"
+  echo -e "  • Local (port 3001):    ${YELLOW}http://localhost:3001${NC}"
   if [ ! -z "$DOMAIN" ] && systemctl is-active --quiet nginx; then
     echo -e "  • Via Nginx/domain:     ${YELLOW}http://$DOMAIN${NC}"
   fi

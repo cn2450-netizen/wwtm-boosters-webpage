@@ -5,13 +5,13 @@
 # Usage:
 #   - Manual run: bash auto-update.sh
 #   - Background: nohup bash auto-update.sh &
-#   - Cron job:   0 */4 * * * bash /var/www/wwtmc/auto-update.sh (every 4 hours)
+#   - Cron job:   0 */4 * * * bash /opt/wwtmc/auto-update.sh (every 4 hours)
 #   - Systemd:    See auto-update.timer
 
 set -e
 
 # Configuration
-INSTALL_DIR="/var/www/wwtmc"
+INSTALL_DIR="/opt/wwtmc"
 SOURCE_REPO="${SOURCE_REPO:-}"  # Git repo URL (optional)
 SOURCE_DIR="${SOURCE_DIR:-}"    # Local directory to check (optional)
 LOG_FILE="/var/log/wwtmc-auto-update.log"
