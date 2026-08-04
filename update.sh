@@ -53,7 +53,7 @@ echo -e "${GREEN}[3/4]${NC} Updating application files..."
 cp "$SOURCE_DIR/server.js" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/package.json" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/package-lock.json" "$INSTALL_DIR/" 2>/dev/null || true
-cp -r "$SOURCE_DIR/public/" "$INSTALL_DIR/public/"
+cp -r "$SOURCE_DIR/public/." "$INSTALL_DIR/public/"
 echo -e "${GREEN}✓${NC} Files updated"
 
 # Reinstall npm dependencies
