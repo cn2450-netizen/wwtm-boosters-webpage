@@ -33,6 +33,10 @@ CLONED_DIR=""
 
 # Detect if source is a git URL or local directory
 if [[ "$SOURCE_INPUT" == http* ]] || [[ "$SOURCE_INPUT" == git@* ]]; then
+  # Prune leftover temp clones from any previous run that failed before its
+  # own cleanup step ran (e.g. /tmp/wwtmc-update-12345 from a crashed update).
+  find /tmp -maxdepth 1 -name 'wwtmc-update-*' -exec rm -rf {} + 2>/dev/null || true
+
   echo -e "${YELLOW}→${NC} Cloning from: $SOURCE_INPUT"
   SOURCE_DIR="/tmp/wwtmc-update-$$"
   git clone --quiet --depth 1 "$SOURCE_INPUT" "$SOURCE_DIR" || {
