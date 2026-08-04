@@ -1,9 +1,17 @@
 #!/bin/bash
 # WWT Music Club — Update Script
 # Run on your server to update the app without losing data
-# Usage: sudo bash scripts/update.sh /path/to/new/wwtmc
+#
+# Usage: sudo bash scripts/update.sh [source]
+#
+# [source] is optional and can be:
+#   - omitted                        → clones DEFAULT_REPO
+#   - https://github.com/user/repo.git (or git@...)  → clones that repo
+#   - /path/to/local/wwtmc           → uses that local directory as-is
 
 set -e
+
+DEFAULT_REPO="https://github.com/cn2450-netizen/wwtm-boosters-webpage.git"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -19,16 +27,27 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-if [ -z "$1" ]; then
-  echo -e "${RED}✗ Usage: sudo bash scripts/update.sh /path/to/new/wwtmc${NC}"
-  exit 1
-fi
-
-SOURCE_DIR="$1"
+SOURCE_INPUT="${1:-$DEFAULT_REPO}"
 INSTALL_DIR="/opt/wwtmc"
+CLONED_DIR=""
+
+# Detect if source is a git URL or local directory
+if [[ "$SOURCE_INPUT" == http* ]] || [[ "$SOURCE_INPUT" == git@* ]]; then
+  echo -e "${YELLOW}→${NC} Cloning from: $SOURCE_INPUT"
+  SOURCE_DIR="/tmp/wwtmc-update-$$"
+  git clone --quiet --depth 1 "$SOURCE_INPUT" "$SOURCE_DIR" || {
+    echo -e "${RED}✗ Failed to clone repository${NC}"
+    rm -rf "$SOURCE_DIR"
+    exit 1
+  }
+  CLONED_DIR="$SOURCE_DIR"
+else
+  SOURCE_DIR="$SOURCE_INPUT"
+fi
 
 if [ ! -f "$SOURCE_DIR/server.js" ]; then
   echo -e "${RED}✗ $SOURCE_DIR/server.js not found${NC}"
+  [ -n "$CLONED_DIR" ] && rm -rf "$CLONED_DIR"
   exit 1
 fi
 
@@ -70,6 +89,9 @@ echo -e "${GREEN}[4/4]${NC} Updating npm dependencies..."
 cd "$INSTALL_DIR"
 npm install --omit=dev > /dev/null 2>&1
 echo -e "${GREEN}✓${NC} Dependencies updated"
+
+# Clean up temp clone
+[ -n "$CLONED_DIR" ] && rm -rf "$CLONED_DIR"
 
 # Restart service
 systemctl start wwtmc

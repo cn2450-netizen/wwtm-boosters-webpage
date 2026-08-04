@@ -181,16 +181,20 @@ Certbot will auto-configure HTTPS and renew certificates.
 
 ## Updating the Application
 
-When you have new code, use the update script to apply it without losing data:
+When you have new code, use the update script to apply it without losing data.
 
+**Simplest — from an existing install, no arguments needed:**
 ```bash
-sudo bash scripts/update.sh /path/to/new/wwtmc
+sudo bash /opt/wwtmc/scripts/update.sh
+```
+With no argument, it clones the latest `main` from GitHub itself (note:
+`/opt/wwtmc` is NOT a git checkout — it's deployed by copying files, so this
+clones to a temp dir under the hood and cleans up after).
 
-## Or, to pull the latest code and update in one pass (note: /opt/wwtmc is
-## NOT a git checkout — install.sh/update.sh deploy by copying files, so
-## clone to a temp dir first):
-git clone --depth 1 https://github.com/cn2450-netizen/wwtm-boosters-webpage.git /tmp/wwtmc-update
-sudo bash /tmp/wwtmc-update/scripts/update.sh /tmp/wwtmc-update
+**Or point it at a specific source:**
+```bash
+sudo bash scripts/update.sh https://github.com/cn2450-netizen/wwtm-boosters-webpage.git
+sudo bash scripts/update.sh /path/to/new/wwtmc   # local directory
 ```
 
 It will:
