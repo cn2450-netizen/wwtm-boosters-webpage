@@ -12,7 +12,7 @@
 
 #### Option 1: From GitHub (Recommended)
 ```bash
-sudo bash install.sh https://github.com/cn2450-netizen/wwtm-boosters-webpage.git
+sudo bash scripts/install.sh https://github.com/cn2450-netizen/wwtm-boosters-webpage.git
 ```
 
 The script will automatically:
@@ -22,12 +22,12 @@ The script will automatically:
 
 #### Option 2: From Local Directory
 ```bash
-sudo bash install.sh /path/to/wwtmc
+sudo bash scripts/install.sh /path/to/wwtmc
 ```
 
 **Example:**
 ```bash
-sudo bash install.sh /tmp/wwtmc
+sudo bash scripts/install.sh /tmp/wwtmc
 ```
 
 Either way, the script will:
@@ -79,9 +79,9 @@ sudo journalctl -u wwtmc -f  # View logs
 
 ### Option 2: Background mode (Good for development)
 ```bash
-bash /opt/wwtmc/start.sh
+bash /opt/wwtmc/scripts/start.sh
 tail -f /opt/wwtmc/logs/wwtmc-latest.log  # View logs
-bash /opt/wwtmc/stop.sh  # Stop server
+bash /opt/wwtmc/scripts/stop.sh  # Stop server
 ```
 
 ### Option 3: Foreground (for debugging)
@@ -217,9 +217,11 @@ sudo systemctl reload nginx  # Reload if OK
 ├── server.js              ← Express backend
 ├── package.json           ← Dependencies
 ├── package-lock.json
-├── install.sh             ← This script
-├── wwtmc.service          ← Systemd service
-├── nginx.conf             ← Nginx config
+├── scripts/
+│   ├── install.sh         ← This script
+│   ├── update.sh, auto-update.sh
+│   ├── wwtmc.service      ← Systemd service
+│   └── nginx.conf         ← Nginx config
 ├── data/
 │   ├── state.json         ← ALL SITE CONTENT (auto-created)
 │   └── auth.json          ← Password hash (auto-created)

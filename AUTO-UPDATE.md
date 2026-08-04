@@ -12,7 +12,7 @@ Best for: Monitoring a live git repository or network share
 
 ```bash
 # Set up the auto-update service
-sudo cp auto-update.service /etc/systemd/system/
+sudo cp scripts/auto-update.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable auto-update
 sudo systemctl start auto-update
@@ -39,8 +39,8 @@ Best for: Running at specific times (like cron)
 
 ```bash
 # Set up the timer
-sudo cp auto-update.timer /etc/systemd/system/
-sudo cp auto-update.service /etc/systemd/system/
+sudo cp scripts/auto-update.timer /etc/systemd/system/
+sudo cp scripts/auto-update.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable auto-update.timer
 sudo systemctl start auto-update.timer
@@ -69,12 +69,12 @@ Best for: Running on a schedule via cron
 
 ```bash
 # One-time check
-SOURCE_DIR=/mnt/updates bash /opt/wwtmc/auto-update.sh once
+SOURCE_DIR=/mnt/updates bash /opt/wwtmc/scripts/auto-update.sh once
 
 # Add to crontab for every 4 hours
 sudo crontab -e
 # Add this line:
-0 */4 * * * SOURCE_DIR=/mnt/updates bash /opt/wwtmc/auto-update.sh once >> /var/log/wwtmc-auto-update.log 2>&1
+0 */4 * * * SOURCE_DIR=/mnt/updates bash /opt/wwtmc/scripts/auto-update.sh once >> /var/log/wwtmc-auto-update.log 2>&1
 ```
 
 **Pros:**
@@ -333,9 +333,9 @@ sudo systemctl start auto-update
 
 ```bash
 # 1. Copy the files
-sudo cp auto-update.service /etc/systemd/system/
-sudo cp auto-update.timer /etc/systemd/system/
-sudo cp auto-update.sh /opt/wwtmc/
+sudo cp scripts/auto-update.service /etc/systemd/system/
+sudo cp scripts/auto-update.timer /etc/systemd/system/
+sudo cp scripts/auto-update.sh /opt/wwtmc/scripts/
 
 # 2. Edit the service
 sudo tee /etc/systemd/system/auto-update.service > /dev/null <<EOF
@@ -348,7 +348,7 @@ Wants=network-online.target
 Type=oneshot
 User=root
 Environment="SOURCE_REPO=https://github.com/your-org/wwtmc.git"
-ExecStart=/bin/bash /opt/wwtmc/auto-update.sh once
+ExecStart=/bin/bash /opt/wwtmc/scripts/auto-update.sh once
 StandardOutput=journal
 StandardError=journal
 

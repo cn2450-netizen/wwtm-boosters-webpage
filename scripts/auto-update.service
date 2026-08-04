@@ -11,7 +11,7 @@ WorkingDirectory=/opt/wwtmc
 Environment="SOURCE_REPO=https://github.com/cn2450-netizen/wwtm-boosters-webpage.git"
 Environment="CHECK_INTERVAL=900"
 
-ExecStart=/bin/bash /opt/wwtmc/auto-update.sh
+ExecStart=/bin/bash /opt/wwtmc/scripts/auto-update.sh
 
 # Restart policy
 Restart=always

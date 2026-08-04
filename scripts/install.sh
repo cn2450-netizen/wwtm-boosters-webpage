@@ -1,8 +1,8 @@
 #!/bin/bash
 # WWT Music Club — Linux Installation Script
-# Run: sudo bash install.sh <source>
+# Run: sudo bash scripts/install.sh <source>
 #
-# <source> can be:
+# <source> is the repo root (this script's parent directory), and can be:
 #   - /path/to/local/wwtmc (local directory)
 #   - https://github.com/user/repo.git (GitHub repo URL)
 
@@ -20,20 +20,20 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
-   echo -e "${RED}✗ This script must be run as root (use: sudo bash install.sh <source>)${NC}"
+   echo -e "${RED}✗ This script must be run as root (use: sudo bash scripts/install.sh <source>)${NC}"
    exit 1
 fi
 
 # Check for source argument
 if [ -z "$1" ]; then
-  echo -e "${RED}✗ Usage: sudo bash install.sh <source>${NC}"
+  echo -e "${RED}✗ Usage: sudo bash scripts/install.sh <source>${NC}"
   echo ""
   echo "Examples:"
   echo "  # From local directory:"
-  echo "  sudo bash install.sh /tmp/wwtmc"
+  echo "  sudo bash scripts/install.sh /tmp/wwtmc"
   echo ""
   echo "  # From GitHub repository:"
-  echo "  sudo bash install.sh https://github.com/cn2450-netizen/wwtm-boosters-webpage.git"
+  echo "  sudo bash scripts/install.sh https://github.com/cn2450-netizen/wwtm-boosters-webpage.git"
   exit 1
 fi
 
@@ -68,11 +68,11 @@ echo -e "${YELLOW}→${NC} Install to: $INSTALL_DIR"
 echo ""
 
 # Step 1: Update system
-echo -e "${GREEN}[1/8]${NC} Updating package manager..."
+echo -e "${GREEN}[1/9]${NC} Updating package manager..."
 apt-get update -qq
 
 # Step 2: Install Node.js 20.x
-echo -e "${GREEN}[2/8]${NC} Installing Node.js 20.x..."
+echo -e "${GREEN}[2/9]${NC} Installing Node.js 20.x..."
 if ! command -v node &> /dev/null; then
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash - > /dev/null 2>&1
   apt-get install -y nodejs > /dev/null 2>&1
@@ -81,14 +81,15 @@ NODE_VERSION=$(node -v)
 echo -e "${GREEN}✓${NC} Node.js $NODE_VERSION installed"
 
 # Step 3: Create install directory
-echo -e "${GREEN}[3/8]${NC} Creating installation directory..."
+echo -e "${GREEN}[3/9]${NC} Creating installation directory..."
 mkdir -p "$INSTALL_DIR"
 mkdir -p "$INSTALL_DIR/data"
 mkdir -p "$INSTALL_DIR/public/uploads"
+mkdir -p "$INSTALL_DIR/scripts"
 echo -e "${GREEN}✓${NC} Directories created"
 
 # Step 4: Copy files
-echo -e "${GREEN}[4/8]${NC} Copying application files..."
+echo -e "${GREEN}[4/9]${NC} Copying application files..."
 cp "$SOURCE_DIR/server.js" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/package.json" "$INSTALL_DIR/"
 cp -r "$SOURCE_DIR/public/." "$INSTALL_DIR/public/"
@@ -98,24 +99,34 @@ if [ ! -f "$INSTALL_DIR/public/index.html" ]; then
 fi
 echo -e "${GREEN}✓${NC} Files copied"
 
-# Step 5: Install npm dependencies
-echo -e "${GREEN}[5/8]${NC} Installing npm dependencies..."
+# Step 5: Copy ops scripts (so update.sh/auto-update.sh are available on the
+# box afterward without needing to re-clone the repo)
+echo -e "${GREEN}[5/9]${NC} Copying deployment scripts..."
+cp "$SOURCE_DIR/scripts/update.sh" "$INSTALL_DIR/scripts/"
+cp "$SOURCE_DIR/scripts/auto-update.sh" "$INSTALL_DIR/scripts/"
+cp "$SOURCE_DIR/scripts/start.sh" "$INSTALL_DIR/scripts/"
+cp "$SOURCE_DIR/scripts/stop.sh" "$INSTALL_DIR/scripts/"
+chmod +x "$INSTALL_DIR/scripts/"*.sh
+echo -e "${GREEN}✓${NC} Scripts copied to $INSTALL_DIR/scripts"
+
+# Step 6: Install npm dependencies
+echo -e "${GREEN}[6/9]${NC} Installing npm dependencies..."
 cd "$INSTALL_DIR"
 npm install --omit=dev > /dev/null 2>&1
 echo -e "${GREEN}✓${NC} Dependencies installed"
 
-# Step 6: Set permissions
-echo -e "${GREEN}[6/8]${NC} Setting file permissions..."
+# Step 7: Set permissions
+echo -e "${GREEN}[7/9]${NC} Setting file permissions..."
 chown -R www-data:www-data "$INSTALL_DIR"
 chmod -R 755 "$INSTALL_DIR"
 chmod -R 775 "$INSTALL_DIR/data"
 chmod -R 775 "$INSTALL_DIR/public/uploads"
 echo -e "${GREEN}✓${NC} Permissions set"
 
-# Step 7: Copy and set up systemd service
-echo -e "${GREEN}[7/8]${NC} Setting up systemd service..."
-if [ -f "$SOURCE_DIR/wwtmc.service" ]; then
-  cp "$SOURCE_DIR/wwtmc.service" /etc/systemd/system/
+# Step 8: Copy and set up systemd service
+echo -e "${GREEN}[8/9]${NC} Setting up systemd service..."
+if [ -f "$SOURCE_DIR/scripts/wwtmc.service" ]; then
+  cp "$SOURCE_DIR/scripts/wwtmc.service" /etc/systemd/system/
 
   # Generate a random session secret
   SESSION_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
@@ -129,14 +140,14 @@ else
   echo -e "${YELLOW}⚠${NC} wwtmc.service not found (systemd setup skipped)"
 fi
 
-# Step 8: Optional Nginx setup
-echo -e "${GREEN}[8/8]${NC} Nginx setup..."
-if [ -f "$SOURCE_DIR/nginx.conf" ]; then
+# Step 9: Optional Nginx setup
+echo -e "${GREEN}[9/9]${NC} Nginx setup..."
+if [ -f "$SOURCE_DIR/scripts/nginx.conf" ]; then
   read -p "Install Nginx reverse proxy? (y/n) " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     apt-get install -y nginx > /dev/null 2>&1
-    cp "$SOURCE_DIR/nginx.conf" /etc/nginx/sites-available/wwtmc
+    cp "$SOURCE_DIR/scripts/nginx.conf" /etc/nginx/sites-available/wwtmc
 
     read -p "Enter your domain (e.g. wwtmusic.club): " DOMAIN
     if [ ! -z "$DOMAIN" ]; then

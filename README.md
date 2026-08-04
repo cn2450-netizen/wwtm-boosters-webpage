@@ -5,14 +5,14 @@
 **Fastest way to deploy — directly from GitHub:**
 
 ```bash
-sudo bash install.sh https://github.com/cn2450-netizen/wwtm-boosters-webpage.git
+sudo bash scripts/install.sh https://github.com/cn2450-netizen/wwtm-boosters-webpage.git
 ```
 
 That's it! Everything is set up. See [**QUICKSTART.md**](QUICKSTART.md) for full details.
 
 **Or from a local directory:**
 ```bash
-sudo bash install.sh /path/to/wwtmc
+sudo bash scripts/install.sh /path/to/wwtmc
 ```
 
 ---
@@ -44,7 +44,7 @@ sudo bash install.sh /path/to/wwtmc
 ### Option 1: Automated (Recommended)
 
 ```bash
-sudo bash install.sh /path/to/wwtmc
+sudo bash scripts/install.sh /path/to/wwtmc
 ```
 
 The script will:
@@ -60,7 +60,7 @@ The script will:
 scp -r wwtmc/ user@your-server:/tmp/wwtmc
 
 # Then SSH in and run:
-sudo bash install.sh /tmp/wwtmc
+sudo bash scripts/install.sh /tmp/wwtmc
 ```
 
 ### Option 2: Manual Installation
@@ -104,7 +104,7 @@ sudo chmod -R 755 /opt/wwtmc
 
 ```bash
 # Copy the service file
-sudo cp /opt/wwtmc/wwtmc.service /etc/systemd/system/
+sudo cp /opt/wwtmc/scripts/wwtmc.service /etc/systemd/system/
 
 # Generate a random session secret
 SESSION_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
@@ -142,7 +142,7 @@ For a cleaner URL and HTTPS support:
 sudo apt install -y nginx
 
 # Copy and customize the config
-sudo cp /opt/wwtmc/nginx.conf /etc/nginx/sites-available/wwtmc
+sudo cp /opt/wwtmc/scripts/nginx.conf /etc/nginx/sites-available/wwtmc
 sudo nano /etc/nginx/sites-available/wwtmc
 # Change "yourdomain.com" to your actual domain
 
@@ -184,11 +184,13 @@ Certbot will auto-configure HTTPS and renew certificates.
 When you have new code, use the update script to apply it without losing data:
 
 ```bash
-sudo bash update.sh /path/to/new/wwtmc
+sudo bash scripts/update.sh /path/to/new/wwtmc
 
-## this pull the code and updates in one pass
-sudo git -C /opt/wwtmc fetch origin && sudo git -C /opt/wwtmc checkout -f origin/main && sudo systemctl restart wwtmc
-
+## Or, to pull the latest code and update in one pass (note: /opt/wwtmc is
+## NOT a git checkout — install.sh/update.sh deploy by copying files, so
+## clone to a temp dir first):
+git clone --depth 1 https://github.com/cn2450-netizen/wwtm-boosters-webpage.git /tmp/wwtmc-update
+sudo bash /tmp/wwtmc-update/scripts/update.sh /tmp/wwtmc-update
 ```
 
 It will:
@@ -235,13 +237,13 @@ sudo systemctl enable wwtmc
 
 ```bash
 # Start in background
-bash /opt/wwtmc/start.sh
+bash /opt/wwtmc/scripts/start.sh
 
 # View logs
 tail -f /opt/wwtmc/logs/wwtmc-latest.log
 
 # Stop
-bash /opt/wwtmc/stop.sh
+bash /opt/wwtmc/scripts/stop.sh
 ```
 
 ### Manual (Foreground, for debugging)
@@ -366,10 +368,14 @@ sudo tail -f /var/log/nginx/error.log
 ├── server.js              ← Express app (main backend)
 ├── package.json           ← Node dependencies
 ├── package-lock.json      ← Locked versions
-├── install.sh             ← Installation script
-├── update.sh              ← Update script
-├── wwtmc.service          ← Systemd service file
-├── nginx.conf             ← Nginx reverse proxy config
+├── scripts/
+│   ├── install.sh         ← Installation script
+│   ├── update.sh          ← Update script
+│   ├── auto-update.sh     ← Auto-update daemon
+│   ├── auto-update.service, auto-update.timer
+│   ├── start.sh, stop.sh  ← Manual start/stop
+│   ├── wwtmc.service      ← Systemd service file
+│   └── nginx.conf         ← Nginx reverse proxy config
 ├── README.md              ← This file
 ├── QUICKSTART.md          ← Quick reference
 ├── data/                  ← Created automatically
@@ -404,7 +410,7 @@ Defaults are fine for most setups.
 - **Database:** Optional — currently uses JSON files (good for small/medium sites)
 
 For larger deployments:
-- Add a reverse proxy (Nginx) — handled by `install.sh`
+- Add a reverse proxy (Nginx) — handled by `scripts/install.sh`
 - Consider a database (PostgreSQL) — requires code changes
 - Use object storage (S3) for images — requires code changes
 

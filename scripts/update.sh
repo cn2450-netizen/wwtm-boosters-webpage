@@ -1,7 +1,7 @@
 #!/bin/bash
 # WWT Music Club — Update Script
 # Run on your server to update the app without losing data
-# Usage: sudo bash update.sh /path/to/new/wwtmc
+# Usage: sudo bash scripts/update.sh /path/to/new/wwtmc
 
 set -e
 
@@ -15,12 +15,12 @@ echo -e "${GREEN}  WWT Music Club — Update Script${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
 if [[ $EUID -ne 0 ]]; then
-   echo -e "${RED}✗ This script must be run as root (use: sudo bash update.sh)${NC}"
+   echo -e "${RED}✗ This script must be run as root (use: sudo bash scripts/update.sh)${NC}"
    exit 1
 fi
 
 if [ -z "$1" ]; then
-  echo -e "${RED}✗ Usage: sudo bash update.sh /path/to/new/wwtmc${NC}"
+  echo -e "${RED}✗ Usage: sudo bash scripts/update.sh /path/to/new/wwtmc${NC}"
   exit 1
 fi
 
@@ -54,6 +54,15 @@ cp "$SOURCE_DIR/server.js" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/package.json" "$INSTALL_DIR/"
 cp "$SOURCE_DIR/package-lock.json" "$INSTALL_DIR/" 2>/dev/null || true
 cp -r "$SOURCE_DIR/public/." "$INSTALL_DIR/public/"
+mkdir -p "$INSTALL_DIR/scripts"
+# update.sh/auto-update.sh may be the very script (or the parent script)
+# currently executing this update — copy-then-rename instead of overwriting
+# in place, so a live interpreter reading the old inode isn't corrupted mid-run.
+for f in update.sh auto-update.sh start.sh stop.sh; do
+  cp "$SOURCE_DIR/scripts/$f" "$INSTALL_DIR/scripts/$f.new"
+  mv "$INSTALL_DIR/scripts/$f.new" "$INSTALL_DIR/scripts/$f"
+done
+chmod +x "$INSTALL_DIR/scripts/"*.sh
 echo -e "${GREEN}✓${NC} Files updated"
 
 # Reinstall npm dependencies

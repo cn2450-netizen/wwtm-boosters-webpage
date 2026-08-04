@@ -5,7 +5,7 @@
 # Usage:
 #   - Manual run: bash auto-update.sh
 #   - Background: nohup bash auto-update.sh &
-#   - Cron job:   0 */4 * * * bash /opt/wwtmc/auto-update.sh (every 4 hours)
+#   - Cron job:   0 */4 * * * bash /opt/wwtmc/scripts/auto-update.sh (every 4 hours)
 #   - Systemd:    See auto-update.timer
 
 set -e
@@ -63,7 +63,7 @@ fetch_from_git() {
   if git clone --quiet --depth 1 "$SOURCE_REPO" "$temp_dir" 2>&1; then
     if [ -f "$temp_dir/server.js" ]; then
       log "INFO" "Git repository cloned successfully"
-      bash "$INSTALL_DIR/update.sh" "$temp_dir"
+      bash "$INSTALL_DIR/scripts/update.sh" "$temp_dir"
       rm -rf "$temp_dir"
       return 0
     else
@@ -97,7 +97,7 @@ check_local_source() {
 
   if [ "$source_time" -gt "$installed_time" ]; then
     log "INFO" "Updates detected in source directory"
-    bash "$INSTALL_DIR/update.sh" "$SOURCE_DIR"
+    bash "$INSTALL_DIR/scripts/update.sh" "$SOURCE_DIR"
     return 0
   else
     log "INFO" "No updates available"
