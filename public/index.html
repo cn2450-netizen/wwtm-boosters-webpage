@@ -1612,9 +1612,13 @@ function renderEventListFromData(events) {
   const list = document.getElementById('event-list');
   if (!list) return;
   list.innerHTML = events.map(ev => {
-    const d     = new Date(ev.date + 'T12:00:00');
+    // startUTC (a real instant) converts to the viewer's local time, same as the
+    // Google Calendar embed — matches date + time to that source of truth. Falls
+    // back to the floating date/time strings for all-day or TZID-only events.
+    const d     = ev.startUTC ? new Date(ev.startUTC) : new Date(ev.date + 'T12:00:00');
     const day   = d.getDate();
     const month = d.toLocaleString('default', { month: 'short' }).toUpperCase();
+    const time  = ev.startUTC ? formatLocalTime(d) : ev.time;
 
     let dateBlock;
     if (ev.endDate) {
@@ -1635,11 +1639,17 @@ function renderEventListFromData(events) {
         <div class="event-date">${dateBlock}</div>
         <div class="event-info">
           <div class="event-title">${esc(ev.title)}</div>
-          <div class="event-meta"><span>${esc(ev.time)}</span><span>${esc(ev.location)}</span></div>
+          <div class="event-meta"><span>${esc(time)}</span><span>${esc(ev.location)}</span></div>
         </div>
         <div class="event-tag">${esc(ev.tag)}</div>
       </div>`;
   }).join('');
+}
+
+function formatLocalTime(d) {
+  const h = d.getHours();
+  const m = String(d.getMinutes()).padStart(2, '0');
+  return `${h % 12 || 12}:${m} ${h >= 12 ? 'PM' : 'AM'}`;
 }
 
 // ── DOCUMENTS ────────────────────────────────────────────
